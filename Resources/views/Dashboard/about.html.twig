@@ -1,0 +1,59 @@
+{% set page = {
+    title: 'About',
+    description: 'About Resque WebUI dashboard'
+} %}
+
+{% extends 'AndarisResqueWebUiBundle::layout.html.twig' %}
+
+{% block content %}
+    <p>
+        <img src="{{ asset('bundles/andarisresquewebui/images/logo_large.png') }}" alt="PHP-Resque Web UI Logo" />
+    </p>
+    <p>
+        The PHP-Resque Web UI is an open-source dashboard for the administration of
+        <a href="https://github.com/mjphaynes/php-resque" target="_blank">PHP-Resque</a> workers.
+    </p>
+
+    <h2>System information</h2>
+    <table class="table table-condensed">
+        <tr>
+            <th>PHP version</th>
+            <td>{{ info.phpVersion }}</td>
+        </tr>
+        <tr>
+            <th>PHP-Resque version</th>
+            <td>{{ info.resqueVersion }}</td>
+        </tr>
+        <tr>
+            <th>PHP-Resque Web UI version</th>
+            <td>{{ info.webUiVersion }}</td>
+        </tr>
+        <tr>
+            <th>Resque configuration file</th>
+            <td>{{ info.configFile }}</td>
+        </tr>
+    </table>
+
+    <h2>License</h2>
+    <p>
+    Copyright 2017 Team ALPS
+
+    <p>Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:</p>
+    <ol>
+        <li>Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.</li>
+
+        <li>Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer
+        in the documentation and/or other materials provided with the distribution.</li>
+
+        <li>Neither the name of the copyright holder nor the names of its contributors may be used to endorse or promote products derived
+        from this software without specific prior written permission.</li>
+    </ol>
+    <p>
+        THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+        INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+        IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+        DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+        HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+        ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+    </p>
+{% endblock %}

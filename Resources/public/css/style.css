@@ -1,0 +1,16 @@
+textarea.json {
+    width: 100%;
+}
+
+.json {
+    white-space: pre;
+    font-family: monospace;
+}
+
+td.job-id {
+    font-family: monospace;
+}
+
+td.date-time {
+    font-size: small;
+}

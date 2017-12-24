@@ -1,0 +1,94 @@
+{% set page = {
+    title: 'Jobs',
+    description: 'Resque WebUI jobs'
+} %}
+
+{% extends 'AndarisResqueWebUiBundle::layout.html.twig' %}
+
+{% block content %}
+    <div class="col-lg-12">
+        <h1>Job Details</h1>
+
+        <table class="table table-responsive">
+            <tr>
+                <th style="width: 20%">ID</th>
+                <td style="width: 80%">{{ job.id }}</td>
+            </tr>
+            <tr>
+                <th>Status</th>
+                <td>{{ job.status | formatJobStatus }}</td>
+            </tr>
+            <tr>
+                <th>Queue</th>
+                <td>{{ job.queue }}</td>
+            </tr>
+            <tr>
+                <th>Worker</th>
+                <td>{{ job.worker }}</td>
+            </tr>
+            <tr>
+                <th>Payload <span data-copy-to-clipboard="jsonPayload"></span></th>
+                <td>
+                    <textarea id="jsonPayload" readonly="readonly" cols="80" rows="10" class="json">{{ job.payload | prettyPrintJson}}</textarea>
+                </td>
+            </tr>
+            {% if job.exception %}
+            <tr>
+                <th>Exception <span data-copy-to-clipboard="jsonException"></span></th>
+                <td>
+                    <textarea id="jsonException" cols="80" rows="10" class="json">{{ job.exception | prettyPrintJson }}</textarea>
+                </td>
+            </tr>
+            {% endif %}
+            <tr>
+                <th>Created</th>
+                <td>{{ job.created | formatTime }}</td>
+            </tr>
+            <tr>
+                <th>Started</th>
+                <td>{{ job.started | formatTime }}</td>
+            </tr>
+            <tr>
+                <th>Updated</th>
+                <td>{{ job.updated | formatTime }}</td>
+            </tr>
+            <tr>
+                <th>Finished</th>
+                <td>{{ job.finished | formatTime }}</td>
+            </tr>
+        </table>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script>
+    function createCopyToClipboardButtons() {
+        var dataAttribute = 'data-copy-to-clipboard',
+            spans = $('[' + dataAttribute + ']'),
+            button,
+            label,
+            id,
+            i;
+
+        for (i = 0; i < spans.length; i++) {
+            button = document.createElement('button');
+            button.className = 'btn btn-primary';
+            button.title = 'Copy to clipboard';
+            label = document.createElement('i');
+            label.className = 'glyphicon glyphicon-copy';
+            button.appendChild(label);
+            button.addEventListener('click', function(e) {
+                var element = e.target.parentNode || e.srcElement.parentNode;
+                document.getElementById(element.getAttribute(dataAttribute)).select();
+                document.execCommand('copy');
+                document.getElementById(element.getAttribute(dataAttribute)).blur();
+            });
+
+            spans[i].appendChild(button);
+        }
+    }
+
+    createCopyToClipboardButtons();
+</script>
+{% endblock %}

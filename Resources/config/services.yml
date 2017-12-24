@@ -1,0 +1,109 @@
+parameters:
+    andaris_resque_web_ui_config: '%kernel.root_dir%/config/resque.yml'
+
+services:
+    # controllers
+    andaris_resque_web_ui.controller.dashboard:
+        class: Andaris\ResqueWebUiBundle\Controller\DashboardController
+        arguments:
+            - '@twig'
+            - '@andaris_resque_web_ui.adapter.configurator'
+
+    andaris_resque_web_ui.controller.job:
+        class: Andaris\ResqueWebUiBundle\Controller\JobController
+        arguments:
+            - '@twig'
+            - '@andaris_resque_web_ui.adapter.configurator'
+            - '@andaris_resque_web_ui.factory.job'
+
+    andaris_resque_web_ui.controller.queue:
+        class: Andaris\ResqueWebUiBundle\Controller\QueueController
+        arguments:
+            - '@twig'
+            - '@andaris_resque_web_ui.adapter.configurator'
+            - '@andaris_resque_web_ui.factory.queue'
+
+    andaris_resque_web_ui.controller.worker:
+        class: Andaris\ResqueWebUiBundle\Controller\WorkerController
+        arguments:
+            - '@twig'
+            - '@andaris_resque_web_ui.adapter.configurator'
+            - '@andaris_resque_web_ui.factory.worker'
+
+    # twig extensions
+    andaris_resque_web_ui.twig.byte_formatter:
+        class: Andaris\ResqueWebUiBundle\Twig\ByteFormatterExtension
+        tags:
+            -  { name: twig.extension }
+
+    andaris_resque_web_ui.twig.human_time_diff_formatter:
+        class: Andaris\ResqueWebUiBundle\Twig\HumanTimeDiffFormatterExtension
+        tags:
+            -  { name: twig.extension }
+
+    andaris_resque_web_ui.twig.time_formatter:
+        class: Andaris\ResqueWebUiBundle\Twig\TimeFormatterExtension
+        tags:
+            -  { name: twig.extension }
+
+    andaris_resque_web_ui.twig.json_formatter:
+        class: Andaris\ResqueWebUiBundle\Twig\JsonFormatterExtension
+        tags:
+            -  { name: twig.extension }
+
+    andaris_resque_web_ui.twig.worker_status_formatter:
+        class: Andaris\ResqueWebUiBundle\Twig\WorkerStatusFormatterExtension
+        arguments:
+            - '@andaris_resque_web_ui.adapter.worker'
+        tags:
+            -  { name: twig.extension }
+
+    andaris_resque_web_ui.twig.job_status_formatter:
+        class: Andaris\ResqueWebUiBundle\Twig\JobStatusFormatterExtension
+        arguments:
+            - '@andaris_resque_web_ui.adapter.job'
+        tags:
+            -  { name: twig.extension }
+
+    # resque factories
+    andaris_resque_web_ui.factory.job:
+        class: Andaris\ResqueWebUiBundle\Dto\JobFactory
+        arguments:
+            - '@andaris_resque_web_ui.adapter.job'
+            - '@andaris_resque_web_ui.adapter.redis'
+
+    andaris_resque_web_ui.factory.queue:
+        class: Andaris\ResqueWebUiBundle\Dto\QueueFactory
+        arguments:
+            - '@andaris_resque_web_ui.adapter.queue'
+            - '@andaris_resque_web_ui.adapter.redis'
+
+    andaris_resque_web_ui.factory.worker:
+        class: Andaris\ResqueWebUiBundle\Dto\WorkerFactory
+        arguments:
+            - '@andaris_resque_web_ui.adapter.worker'
+
+    ### private services ###
+
+    # resque adapters
+    andaris_resque_web_ui.adapter.job:
+        class: Andaris\ResqueWebUiBundle\Adapter\JobAdapter
+        private: true
+
+    andaris_resque_web_ui.adapter.queue:
+        class: Andaris\ResqueWebUiBundle\Adapter\QueueAdapter
+        private: true
+
+    andaris_resque_web_ui.adapter.redis:
+        class: Andaris\ResqueWebUiBundle\Adapter\RedisAdapter
+        private: true
+
+    andaris_resque_web_ui.adapter.worker:
+        class: Andaris\ResqueWebUiBundle\Adapter\WorkerAdapter
+        private: true
+
+    andaris_resque_web_ui.adapter.configurator:
+        class: Andaris\ResqueWebUiBundle\Adapter\ResqueConfigurator
+        arguments:
+            - '%andaris_resque_web_ui_config%'
+        private: true

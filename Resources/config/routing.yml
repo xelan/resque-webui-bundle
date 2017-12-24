@@ -1,0 +1,23 @@
+andaris_resque_web_ui_home:
+    path:     /
+    defaults: { _controller: andaris_resque_web_ui.controller.dashboard:indexAction }
+
+andaris_resque_web_ui_queues:
+    path:     /queues
+    defaults: { _controller: andaris_resque_web_ui.controller.queue:indexAction }
+
+andaris_resque_web_ui_workers:
+    path:     /workers
+    defaults: { _controller: andaris_resque_web_ui.controller.worker:indexAction }
+
+andaris_resque_web_ui_job:
+    path:     /job/{jobId}
+    defaults: { _controller: andaris_resque_web_ui.controller.job:detailsAction }
+
+andaris_resque_web_ui_jobs:
+    path:     /jobs
+    defaults: { _controller: andaris_resque_web_ui.controller.job:indexAction }
+
+andaris_resque_web_ui_about:
+    path:     /about
+    defaults: { _controller: andaris_resque_web_ui.controller.dashboard:aboutAction }

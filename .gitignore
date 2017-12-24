@@ -1,0 +1,30 @@
+/web/bundles/
+/app/bootstrap.php.cache
+/app/cache/*
+/app/config/parameters.yml
+/app/logs/*
+!app/cache/.gitkeep
+!app/logs/.gitkeep
+/app/phpunit.xml
+/bin/
+/build/
+/temp/
+/vendor/
+/composer.phar
+
+# temp files etc
+.DS_Store
+*.lock
+*.cache
+*~
+.Spotlight-V100
+.Trashes
+Desktop.ini
+$RECYCLE.BIN/
+
+# thumbnails
+._*
+thumbs.db
+
+# netbeans
+nbproject/private

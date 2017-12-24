@@ -1,0 +1,49 @@
+{
+    "name": "andaris/resque-webui-bundle",
+    "description": "Web interface for php-resque",
+    "license": "BSD-3-Clause",
+    "type": "symfony-bundle",
+    "authors": [
+        {
+            "name": "Andreas Erhard",
+            "email": "developer@andaris.at"
+        },
+        {
+            "name": "Sarah Bernardi",
+            "email": "s.bernardi@mci4me.at"
+        },
+        {
+            "name": "Luisa Brinkschulte",
+            "email": "l.brinkschulte@mci4me.at"
+        },
+        {
+            "name": "Claudia Postulka",
+            "email": "c.postulka@mci4me.at"
+        }
+    ],
+    "support": {
+        "issues": "https://github.com/xelan/resque-webui-bundle/issues",
+        "source": "https://github.com/xelan/resque-webui-bundle/"
+    },
+    "autoload": {
+        "psr-4": {
+            "Andaris\\ResqueWebUiBundle\\": ""
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Andaris\\ResqueWebUiBundle\\Tests\\": "Tests"
+        }
+    },
+    "require": {
+        "php": ">=5.6.0",
+        "mjphaynes/php-resque": "~2.1"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "~5.7",
+        "squizlabs/php_codesniffer": "~3.0"
+    },
+    "config": {
+        "bin-dir": "bin"
+    }
+}
