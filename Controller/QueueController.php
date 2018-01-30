@@ -2,7 +2,7 @@
 /**
  * PHP-Resque Web UI.
  *
- * @copyright (c) 2017 Team ALPS
+ * @copyright (c) 2017-2018 Team ALPS
  * @author Andreas Erhard <developer@andaris.at>
  */
 
