@@ -2,7 +2,7 @@
 /**
  * Resque Web UI Application.
  *
- * @copyright (c) 2017-2018 Team ALPS
+ * @copyright (c) 2017-2020 Team ALPS
  * @author Andreas Erhard <developer@andaris.at>
  */
 
@@ -15,5 +15,5 @@ use Symfony\Component\HttpKernel\Bundle\Bundle;
  */
 class AndarisResqueWebUiBundle extends Bundle
 {
-    const VERSION = '1.0.0';
+    const VERSION = '1.1.0-dev';
 }
