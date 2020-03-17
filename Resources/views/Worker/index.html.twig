@@ -29,7 +29,7 @@
                 <td>{{ worker.started | formatHumanTimeDiff }}</td>
                 {% if worker.currentJobId %}
                     <td>
-                        {{ worker.currentJobId }} for
+                        <a href="{{ path('andaris_resque_web_ui_job', {'jobId': worker.currentJobId}) }}">{{ worker.currentJobId }}</a> for
                         {{ worker.currentJobStarted | formatHumanTimeDiff }}
                     </td>
                 {% else %}
