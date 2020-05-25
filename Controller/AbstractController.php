@@ -32,7 +32,7 @@ abstract class AbstractController
      * @param Twig_Environment   $twig
      * @param ResqueConfigurator $configurator
      */
-    public function __construct(Twig_Environment $twig, ResqueConfigurator $configurator)
+    public function __construct(Twig_Environment $twig = null, ResqueConfigurator $configurator = null)
     {
         $this->twig = $twig;
         $this->configurator = $configurator;

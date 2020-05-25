@@ -18,6 +18,10 @@ andaris_resque_web_ui_jobs:
     path:     /jobs
     defaults: { _controller: andaris_resque_web_ui.controller.job:indexAction }
 
+andaris_resque_web_ui_metrics_prometheus:
+    path:     /metrics/prometheus
+    defaults: { _controller: andaris_resque_web_ui.controller.metrics:exportPrometheusAction }
+
 andaris_resque_web_ui_about:
     path:     /about
     defaults: { _controller: andaris_resque_web_ui.controller.dashboard:aboutAction }

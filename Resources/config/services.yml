@@ -30,6 +30,13 @@ services:
             - '@andaris_resque_web_ui.adapter.configurator'
             - '@andaris_resque_web_ui.factory.worker'
 
+    andaris_resque_web_ui.controller.metrics:
+        class: Andaris\ResqueWebUiBundle\Controller\MetricsController
+        arguments:
+            - '@andaris_resque_web_ui.adapter.configurator'
+            - '@andaris_resque_web_ui.factory.queue'
+            - '@andaris_resque_web_ui.factory.worker'
+
     # twig extensions
     andaris_resque_web_ui.twig.byte_formatter:
         class: Andaris\ResqueWebUiBundle\Twig\ByteFormatterExtension
