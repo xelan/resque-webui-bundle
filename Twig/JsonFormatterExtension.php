@@ -25,6 +25,17 @@ class JsonFormatterExtension extends Twig_Extension
 
     public function prettyPrintJson($json)
     {
-        return json_encode(json_decode($json, true), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+        if ($json === null || $json === '') {
+            return '';
+        }
+
+        $decoded = json_decode($json, true);
+
+        // not valid JSON, show it unchanged instead of the literal "null"
+        if ($decoded === null && strtolower(trim($json)) !== 'null') {
+            return $json;
+        }
+
+        return json_encode($decoded, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
     }
 }
