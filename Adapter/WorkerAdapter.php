@@ -9,6 +9,7 @@
 namespace Andaris\ResqueWebUiBundle\Adapter;
 
 use InvalidArgumentException;
+use Resque\Logger;
 use Resque\Worker;
 
 /**
