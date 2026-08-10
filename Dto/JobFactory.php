@@ -62,8 +62,6 @@ class JobFactory
 
     public function createById($id)
     {
-        $data = $this->redisAdapter->instance()->hgetall($id);
-
         if (!$data = $this->redisAdapter->instance()->hgetall('job:' . $id)) {
             return null;
         }
