@@ -102,7 +102,7 @@ class MetricsController extends AbstractController
      */
     private function isPrometheusRequest(Request $request)
     {
-        return false !== stripos($request->headers->get('User-Agent'), self::PROMETHEUS_USER_AGENT);
+        return false !== stripos($request->headers->get('User-Agent', ''), self::PROMETHEUS_USER_AGENT);
     }
 
     /**
