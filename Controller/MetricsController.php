@@ -120,24 +120,29 @@ class MetricsController extends AbstractController
 
         $o .= '# HELP resque_queue_queued queued jobs' . $lf . '# TYPE resque_queue_queued gauge' . $lf;
         foreach ($queues as $queue) {
-            $o .= sprintf('resque_queue_queued{queue="%s"} %d', $queue->getName(), $queue->getJobsQueued()) . $lf;
+            $name = $this->escapeLabelValue($queue->getName());
+            $o .= sprintf('resque_queue_queued{queue="%s"} %d', $name, $queue->getJobsQueued()) . $lf;
         }
         $o .= '# HELP resque_queue_delayed delayed jobs' . $lf . '# TYPE resque_queue_delayed gauge' . $lf;
         foreach ($queues as $queue) {
-            $o .= sprintf('resque_queue_delayed{queue="%s"} %d', $queue->getName(), $queue->getJobsDelayed()) . $lf;
+            $name = $this->escapeLabelValue($queue->getName());
+            $o .= sprintf('resque_queue_delayed{queue="%s"} %d', $name, $queue->getJobsDelayed()) . $lf;
         }
 
         $o .= '# HELP resque_queue_processed processed jobs' . $lf . '# TYPE resque_queue_processed counter' . $lf;
         foreach ($queues as $queue) {
-            $o .= sprintf('resque_queue_processed{queue="%s"} %d', $queue->getName(), $queue->getJobsProcessed()) . $lf;
+            $name = $this->escapeLabelValue($queue->getName());
+            $o .= sprintf('resque_queue_processed{queue="%s"} %d', $name, $queue->getJobsProcessed()) . $lf;
         }
         $o .= '# HELP resque_queue_cancelled cancelled jobs' . $lf . '# TYPE resque_queue_cancelled counter' . $lf;
         foreach ($queues as $queue) {
-            $o .= sprintf('resque_queue_cancelled{queue="%s"} %d', $queue->getName(), $queue->getJobsCancelled()) . $lf;
+            $name = $this->escapeLabelValue($queue->getName());
+            $o .= sprintf('resque_queue_cancelled{queue="%s"} %d', $name, $queue->getJobsCancelled()) . $lf;
         }
         $o .= '# HELP resque_queue_failed failed jobs' . $lf . '# TYPE resque_queue_failed counter' . $lf;
         foreach ($queues as $queue) {
-            $o .= sprintf('resque_queue_failed{queue="%s"} %d', $queue->getName(), $queue->getJobsFailed()) . $lf;
+            $name = $this->escapeLabelValue($queue->getName());
+            $o .= sprintf('resque_queue_failed{queue="%s"} %d', $name, $queue->getJobsFailed()) . $lf;
         }
 
         return $o;
@@ -169,22 +174,40 @@ class MetricsController extends AbstractController
 
         $o .= '# HELP resque_worker_processed processed jobs' . $lf . '# TYPE resque_worker_processed counter' . $lf;
         foreach ($workers as $worker) {
-            $o .= sprintf('resque_worker_processed{id="%s"} %d', $worker->getId(), $worker->getJobsProcessed()) . $lf;
+            $id = $this->escapeLabelValue($worker->getId());
+            $o .= sprintf('resque_worker_processed{id="%s"} %d', $id, $worker->getJobsProcessed()) . $lf;
         }
         $o .= '# HELP resque_worker_cancelled cancelled jobs' . $lf . '# TYPE resque_worker_cancelled counter' . $lf;
         foreach ($workers as $worker) {
-            $o .= sprintf('resque_worker_cancelled{id="%s"} %d', $worker->getId(), $worker->getJobsCancelled()) . $lf;
+            $id = $this->escapeLabelValue($worker->getId());
+            $o .= sprintf('resque_worker_cancelled{id="%s"} %d', $id, $worker->getJobsCancelled()) . $lf;
         }
         $o .= '# HELP resque_worker_failed failed jobs' . $lf . '# TYPE resque_worker_failed counter' . $lf;
         foreach ($workers as $worker) {
-            $o .= sprintf('resque_worker_failed{id="%s"} %d', $worker->getId(), $worker->getJobsFailed()) . $lf;
+            $id = $this->escapeLabelValue($worker->getId());
+            $o .= sprintf('resque_worker_failed{id="%s"} %d', $id, $worker->getJobsFailed()) . $lf;
         }
         $o .= '# HELP resque_worker_mem memory usage' . $lf . '# TYPE resque_worker_mem gauge' . $lf;
         foreach ($workers as $worker) {
-            $o .= sprintf('resque_worker_mem{id="%s"} %d', $worker->getId(), $worker->getMemory()) . $lf;
+            $id = $this->escapeLabelValue($worker->getId());
+            $o .= sprintf('resque_worker_mem{id="%s"} %d', $id, $worker->getMemory()) . $lf;
         }
 
         return $o;
+    }
+
+    /**
+     * Escapes a label value for the prometheus exposition format.
+     *
+     * @see https://prometheus.io/docs/instrumenting/exposition_formats/
+     *
+     * @param string $value
+     *
+     * @return string
+     */
+    private function escapeLabelValue($value)
+    {
+        return str_replace(['\\', '"', "\n"], ['\\\\', '\\"', '\\n'], $value);
     }
 
     /**
