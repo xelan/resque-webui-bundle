@@ -54,7 +54,12 @@ class JobFactory
             $keyArray = explode(':', $key);
             $id = array_pop($keyArray);
 
-            $jobs[] = $this->createById($id);
+            $job = $this->createById($id);
+
+            // the job may have expired between listing the keys and reading it
+            if ($job !== null) {
+                $jobs[] = $job;
+            }
         }
 
         return $jobs;
