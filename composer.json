@@ -28,7 +28,10 @@
     "autoload": {
         "psr-4": {
             "Andaris\\ResqueWebUiBundle\\": ""
-        }
+        },
+        "files": [
+            "php-resque-compatibility.php"
+        ]
     },
     "autoload-dev": {
         "psr-4": {
@@ -37,12 +40,14 @@
     },
     "require": {
         "php": ">=7.2.5",
-        "mjphaynes/php-resque": "~2.1",
-        "twig/twig": "^1.44"
+        "mjphaynes/php-resque": "^2.1|^3.0|^4.0",
+        "twig/twig": "^1.44|^2.16|^3.0"
     },
     "require-dev": {
-        "phpunit/phpunit": "~5.7",
-        "squizlabs/php_codesniffer": "~3.0"
+        "phpunit/phpunit": "^8.5.52",
+        "squizlabs/php_codesniffer": "~3.0",
+        "symfony/http-foundation": "^4.4|^5.4",
+        "symfony/http-kernel": "^4.4|^5.4"
     },
     "config": {
         "bin-dir": "bin"

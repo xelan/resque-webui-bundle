@@ -1,0 +1,66 @@
+name: Tests
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  tests:
+    name: PHP ${{ matrix.php }} · php-resque ${{ matrix.resque }} · twig ${{ matrix.twig || 'highest' }}
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        php: ['7.2', '7.3', '7.4', '8.0', '8.1', '8.2', '8.3', '8.4']
+        resque: ['^2.1', '^3.0', '^4.0']
+        # an empty constraint leaves the resolution to composer, which picks the
+        # highest allowed twig release
+        twig: ['']
+        include:
+          # php-resque 4 requires symfony/console ^5.4|^6.0, which drags in a
+          # symfony/http-kernel that conflicts with twig < 2.13, so the legacy
+          # twig line can only be covered on php-resque 2 and 3
+          - php: '8.4'
+            resque: '^2.1'
+            twig: '^1.44'
+          - php: '8.4'
+            resque: '^3.0'
+            twig: '^1.44'
+          - php: '8.4'
+            resque: '^4.0'
+            twig: '^2.16'
+
+    steps:
+      - name: Check out the code
+        uses: actions/checkout@v7
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          coverage: none
+          tools: composer:v2
+
+      # twig 1.x is end of life and php-resque 2.x pulls in symfony/yaml 2.7/3.0,
+      # both of which composer refuses to install because of open advisories. The
+      # audit still reports them in the log. Drop this step once the oldest
+      # supported versions are gone.
+      - name: Allow the installation of the end of life dependencies
+        run: composer config --global audit.block-insecure false
+
+      - name: Select the php-resque version under test
+        run: composer require --no-update --no-interaction "mjphaynes/php-resque:${{ matrix.resque }}"
+
+      - name: Select the twig version under test
+        if: matrix.twig != ''
+        run: composer require --no-update --no-interaction "twig/twig:${{ matrix.twig }}"
+
+      - name: Install the dependencies
+        run: composer update --prefer-dist --no-interaction --no-progress
+
+      - name: Report the resolved versions
+        run: composer show --direct
+
+      - name: Run the test suite
+        run: bin/phpunit

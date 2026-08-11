@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd"
+         bootstrap="vendor/autoload.php"
+         colors="true"
+         beStrictAboutTestsThatDoNotTestAnything="true"
+         convertDeprecationsToExceptions="false">
+
+    <php>
+        <!-- keep date() based assertions independent of the machine timezone -->
+        <ini name="date.timezone" value="UTC"/>
+    </php>
+
+    <testsuites>
+        <testsuite name="AndarisResqueWebUiBundle">
+            <directory>Tests</directory>
+        </testsuite>
+    </testsuites>
+
+    <filter>
+        <whitelist>
+            <directory suffix=".php">Adapter</directory>
+            <directory suffix=".php">Controller</directory>
+            <directory suffix=".php">DependencyInjection</directory>
+            <directory suffix=".php">Dto</directory>
+            <directory suffix=".php">Twig</directory>
+        </whitelist>
+    </filter>
+</phpunit>
