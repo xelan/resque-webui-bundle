@@ -41,7 +41,7 @@ class JobAdapter
             case Job::STATUS_FAILED:
                 return 'Failed';
             default:
-                throw new InvalidArgumentException(sprintf('Invalid status "%s"!'), $status);
+                throw new InvalidArgumentException(sprintf('Invalid status "%s"!', $status));
         }
     }
 

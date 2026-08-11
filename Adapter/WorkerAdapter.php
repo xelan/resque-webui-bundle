@@ -9,6 +9,7 @@
 namespace Andaris\ResqueWebUiBundle\Adapter;
 
 use InvalidArgumentException;
+use Resque\Logger;
 use Resque\Worker;
 
 /**
@@ -28,7 +29,7 @@ class WorkerAdapter
     public function getStatusText($status)
     {
         if (!array_key_exists($status, Worker::$statusText)) {
-            throw new InvalidArgumentException(sprintf('Invalid status "%s"!'), $status);
+            throw new InvalidArgumentException(sprintf('Invalid status "%s"!', $status));
         }
 
         return Worker::$statusText[$status];
