@@ -8,10 +8,10 @@
 
 namespace Andaris\ResqueWebUiBundle\Twig;
 
-use Twig_Extension;
-use Twig_SimpleFilter;
+use Twig\Extension\AbstractExtension;
+use Twig\TwigFilter;
 
-class TimeFormatterExtension extends Twig_Extension
+class TimeFormatterExtension extends AbstractExtension
 {
     /**
      * {@inheritdoc}
@@ -19,7 +19,7 @@ class TimeFormatterExtension extends Twig_Extension
     public function getFilters()
     {
         return [
-            new Twig_SimpleFilter('formatTime', [$this, 'formatTime']),
+            new TwigFilter('formatTime', [$this, 'formatTime']),
         ];
     }
 

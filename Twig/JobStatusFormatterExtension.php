@@ -8,12 +8,12 @@
 
 namespace Andaris\ResqueWebUiBundle\Twig;
 
-use Twig_Extension;
-use Twig_SimpleFilter;
+use Twig\Extension\AbstractExtension;
+use Twig\TwigFilter;
 
 use Andaris\ResqueWebUiBundle\Adapter\JobAdapter;
 
-class JobStatusFormatterExtension extends Twig_Extension
+class JobStatusFormatterExtension extends AbstractExtension
 {
     private $jobAdapter;
 
@@ -33,7 +33,7 @@ class JobStatusFormatterExtension extends Twig_Extension
     public function getFilters()
     {
         return [
-            new Twig_SimpleFilter('formatJobStatus', [$this, 'formatJobStatus']),
+            new TwigFilter('formatJobStatus', [$this, 'formatJobStatus']),
         ];
     }
 
