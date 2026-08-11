@@ -9,10 +9,10 @@
 namespace Andaris\ResqueWebUiBundle\Twig;
 
 use Resque\Helpers\Util;
-use Twig_Extension;
-use Twig_SimpleFilter;
+use Twig\Extension\AbstractExtension;
+use Twig\TwigFilter;
 
-class ByteFormatterExtension extends Twig_Extension
+class ByteFormatterExtension extends AbstractExtension
 {
     /**
      * {@inheritdoc}
@@ -20,7 +20,7 @@ class ByteFormatterExtension extends Twig_Extension
     public function getFilters()
     {
         return [
-            new Twig_SimpleFilter('formatBytes', [$this, 'formatBytes']),
+            new TwigFilter('formatBytes', [$this, 'formatBytes']),
         ];
     }
 

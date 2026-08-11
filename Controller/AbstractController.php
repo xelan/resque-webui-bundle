@@ -10,14 +10,14 @@ namespace Andaris\ResqueWebUiBundle\Controller;
 
 use Symfony\Component\HttpFoundation\Response;
 
-use Twig_Environment;
+use Twig\Environment;
 
 use Andaris\ResqueWebUiBundle\Adapter\ResqueConfigurator;
 
 abstract class AbstractController
 {
     /**
-     * @var Twig_Environment
+     * @var Environment
      */
     protected $twig;
 
@@ -29,10 +29,10 @@ abstract class AbstractController
     /**
      * Constructor.
      *
-     * @param Twig_Environment   $twig
+     * @param Environment        $twig
      * @param ResqueConfigurator $configurator
      */
-    public function __construct(Twig_Environment $twig = null, ResqueConfigurator $configurator = null)
+    public function __construct(Environment $twig = null, ResqueConfigurator $configurator = null)
     {
         $this->twig = $twig;
         $this->configurator = $configurator;

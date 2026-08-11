@@ -8,10 +8,10 @@
 
 namespace Andaris\ResqueWebUiBundle\Twig;
 
-use Twig_Extension;
-use Twig_SimpleFilter;
+use Twig\Extension\AbstractExtension;
+use Twig\TwigFilter;
 
-class JsonFormatterExtension extends Twig_Extension
+class JsonFormatterExtension extends AbstractExtension
 {
     /**
      * {@inheritdoc}
@@ -19,7 +19,7 @@ class JsonFormatterExtension extends Twig_Extension
     public function getFilters()
     {
         return [
-            new Twig_SimpleFilter('prettyPrintJson', [$this, 'prettyPrintJson']),
+            new TwigFilter('prettyPrintJson', [$this, 'prettyPrintJson']),
         ];
     }
 

@@ -8,7 +8,7 @@
 
 namespace Andaris\ResqueWebUiBundle\Controller;
 
-use Twig_Environment;
+use Twig\Environment;
 
 use Andaris\ResqueWebUiBundle\Adapter\ResqueConfigurator;
 use Andaris\ResqueWebUiBundle\Dto\WorkerFactory;
@@ -23,12 +23,12 @@ class WorkerController extends AbstractController
     /**
      * Constructor.
      *
-     * @param Twig_Environment   $twig
+     * @param Environment        $twig
      * @param ResqueConfigurator $configurator
      * @param WorkerFactory      $workerFactory
      */
     public function __construct(
-        Twig_Environment $twig,
+        Environment $twig,
         ResqueConfigurator $configurator,
         WorkerFactory $workerFactory
     ) {

@@ -9,10 +9,10 @@
 namespace Andaris\ResqueWebUiBundle\Twig;
 
 use Resque\Helpers\Util;
-use Twig_Extension;
-use Twig_SimpleFilter;
+use Twig\Extension\AbstractExtension;
+use Twig\TwigFilter;
 
-class HumanTimeDiffFormatterExtension extends Twig_Extension
+class HumanTimeDiffFormatterExtension extends AbstractExtension
 {
     /**
      * {@inheritdoc}
@@ -20,7 +20,7 @@ class HumanTimeDiffFormatterExtension extends Twig_Extension
     public function getFilters()
     {
         return [
-            new Twig_SimpleFilter('formatHumanTimeDiff', [$this, 'formatHumanTimeDiff']),
+            new TwigFilter('formatHumanTimeDiff', [$this, 'formatHumanTimeDiff']),
         ];
     }
 
