@@ -1,0 +1,38 @@
+name: Tests
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  tests:
+    name: PHP ${{ matrix.php }}
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        php: ['7.2', '7.3', '7.4', '8.0', '8.1', '8.2', '8.3', '8.4']
+
+    steps:
+      - name: Check out the code
+        uses: actions/checkout@v4
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          coverage: none
+          tools: composer:v2
+
+      # twig 1.x is end of life and php-resque 2.x pulls in symfony/yaml 2.7/3.0,
+      # both of which composer refuses to install because of open advisories.
+      # Drop this step once the dependencies allow a patched version.
+      - name: Allow the installation of the pinned dependencies
+        run: composer config --global audit.block-insecure false
+
+      - name: Install the dependencies
+        run: composer update --prefer-dist --no-interaction --no-progress
+
+      - name: Run the test suite
+        run: bin/phpunit
