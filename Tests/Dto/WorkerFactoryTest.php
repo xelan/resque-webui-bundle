@@ -9,11 +9,11 @@
 namespace Andaris\ResqueWebUiBundle\Tests\Dto;
 
 use PHPUnit\Framework\TestCase;
-use Resque\Worker as ResqueWorker;
 
 use Andaris\ResqueWebUiBundle\Adapter\WorkerAdapter;
 use Andaris\ResqueWebUiBundle\Dto\Worker;
 use Andaris\ResqueWebUiBundle\Dto\WorkerFactory;
+use Andaris\ResqueWebUiBundle\Tests\Double\FakeResqueWorker;
 
 class WorkerFactoryTest extends TestCase
 {
@@ -95,11 +95,7 @@ class WorkerFactoryTest extends TestCase
 
     private function createResqueWorker($id, array $packet)
     {
-        $worker = $this->createMock(ResqueWorker::class);
-        $worker->method('__toString')->willReturn($id);
-        $worker->method('getPacket')->willReturn($packet);
-
-        return $worker;
+        return new FakeResqueWorker($id, $packet);
     }
 
     private function createPacket(array $overrides = [])
