@@ -8,11 +8,14 @@
 
 namespace Andaris\ResqueWebUiBundle\Controller;
 
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 use Twig\Environment;
 
 use Andaris\ResqueWebUiBundle\Adapter\ResqueConfigurator;
+use Andaris\ResqueWebUiBundle\Dto\Job;
+use Andaris\ResqueWebUiBundle\Dto\JobCriteria;
 use Andaris\ResqueWebUiBundle\Dto\JobFactory;
 
 class JobController extends AbstractController
@@ -40,11 +43,42 @@ class JobController extends AbstractController
         $this->jobFactory = $jobFactory;
     }
 
-    public function indexAction()
+    public function indexAction(Request $request)
     {
-        $jobs = $this->jobFactory->createAll();
+        $criteria = JobCriteria::fromRequest($request);
 
-        return $this->render('AndarisResqueWebUiBundle:Job:index.html.twig', ['jobs' => $jobs]);
+        // the full list is read once: the counts of the filter describe every
+        // job, not just the ones that are on screen
+        $jobs = $this->jobFactory->createAll($criteria);
+
+        return $this->render('AndarisResqueWebUiBundle:Job:index.html.twig', [
+            'jobs' => array_values(array_filter($jobs, [$criteria, 'matches'])),
+            'criteria' => $criteria,
+            'counts' => $this->countByStatus($jobs),
+            'total' => count($jobs),
+        ]);
+    }
+
+    /**
+     * Returns the number of jobs per status, indexed by status.
+     *
+     * @param Job[] $jobs
+     *
+     * @return int[]
+     */
+    private function countByStatus(array $jobs)
+    {
+        $counts = array_fill_keys(JobCriteria::STATUSES, 0);
+
+        foreach ($jobs as $job) {
+            $status = (int) $job->getStatus();
+
+            if (array_key_exists($status, $counts)) {
+                ++$counts[$status];
+            }
+        }
+
+        return $counts;
     }
 
     public function detailsAction($jobId)

@@ -12,6 +12,7 @@ use PHPUnit\Framework\TestCase;
 
 use Andaris\ResqueWebUiBundle\Adapter\JobAdapter;
 use Andaris\ResqueWebUiBundle\Dto\Job;
+use Andaris\ResqueWebUiBundle\Dto\JobCriteria;
 use Andaris\ResqueWebUiBundle\Dto\JobFactory;
 use Andaris\ResqueWebUiBundle\Tests\Double\FakeRedisAdapter;
 use Andaris\ResqueWebUiBundle\Tests\Double\FakeRedisClient;
@@ -112,6 +113,130 @@ class JobFactoryTest extends TestCase
         $client = new FakeRedisClient(['job:gone-1', 'job:gone-2']);
 
         $this->assertSame([], $this->createFactory($client)->createAll());
+    }
+
+    /**
+     * Redis returns the keys in no particular order, so the newest job has to
+     * end up on top without any criteria being asked for.
+     */
+    public function testCreateAllOrdersTheJobsByTheirCreationDescendingByDefault()
+    {
+        $jobs = $this->createFactory($this->createClientWith([
+            'older' => ['created' => '1500000000'],
+            'newest' => ['created' => '1500000900'],
+            'newer' => ['created' => '1500000500'],
+        ]))->createAll();
+
+        $this->assertSame(['newest', 'newer', 'older'], $this->idsOf($jobs));
+    }
+
+    /**
+     * @dataProvider orderProvider
+     */
+    public function testCreateAllOrdersTheJobsByTheGivenField($field, $direction, array $hashes, array $expected)
+    {
+        $criteria = new JobCriteria(null, $field, $direction);
+
+        $jobs = $this->createFactory($this->createClientWith($hashes))->createAll($criteria);
+
+        $this->assertSame($expected, $this->idsOf($jobs));
+    }
+
+    public function orderProvider()
+    {
+        $byCreated = [
+            'a' => ['created' => '1500000200'],
+            'b' => ['created' => '1500000100'],
+            'c' => ['created' => '1500000300'],
+        ];
+        $byQueue = [
+            'a' => ['queue' => 'mails'],
+            'b' => ['queue' => 'exports'],
+            'c' => ['queue' => 'reports'],
+        ];
+
+        return [
+            'created ascending' => ['created', 'asc', $byCreated, ['b', 'a', 'c']],
+            'created descending' => ['created', 'desc', $byCreated, ['c', 'a', 'b']],
+            'queue ascending' => ['queue', 'asc', $byQueue, ['b', 'a', 'c']],
+            'queue descending' => ['queue', 'desc', $byQueue, ['c', 'a', 'b']],
+            'id ascending' => ['id', 'asc', $byCreated, ['a', 'b', 'c']],
+            'id descending' => ['id', 'desc', $byCreated, ['c', 'b', 'a']],
+        ];
+    }
+
+    /**
+     * The timestamps arrive as strings and have to be compared as numbers, or
+     * anything below ten sorts above everything else.
+     */
+    public function testTheTimestampsAreComparedAsNumbers()
+    {
+        $jobs = $this->createFactory($this->createClientWith([
+            'nine' => ['created' => '9'],
+            'ten' => ['created' => '10'],
+            'hundred' => ['created' => '100'],
+        ]))->createAll(new JobCriteria(null, 'created', 'asc'));
+
+        $this->assertSame(['nine', 'ten', 'hundred'], $this->idsOf($jobs));
+    }
+
+    /**
+     * @dataProvider directionProvider
+     */
+    public function testJobsWithoutAValueAreAlwaysLast($direction)
+    {
+        $jobs = $this->createFactory($this->createClientWith([
+            'unfinished' => ['finished' => ''],
+            'early' => ['finished' => '1500000100'],
+            'late' => ['finished' => '1500000200'],
+        ]))->createAll(new JobCriteria(null, 'finished', $direction));
+
+        $this->assertSame('unfinished', end($jobs)->getId(), 'the job without a value has to be last');
+    }
+
+    public function directionProvider()
+    {
+        return [
+            'ascending' => ['asc'],
+            'descending' => ['desc'],
+        ];
+    }
+
+    /**
+     * usort is not stable before PHP 8, so equal values need a tiebreaker to
+     * order the same way on every supported version.
+     */
+    public function testJobsThatCompareEqualAreOrderedByTheirId()
+    {
+        $hashes = ['c' => [], 'a' => [], 'b' => []];
+
+        $ascending = $this->createFactory($this->createClientWith($hashes))
+            ->createAll(new JobCriteria(null, 'created', 'asc'));
+        $descending = $this->createFactory($this->createClientWith($hashes))
+            ->createAll(new JobCriteria(null, 'created', 'desc'));
+
+        $this->assertSame(['a', 'b', 'c'], $this->idsOf($ascending));
+        $this->assertSame(['a', 'b', 'c'], $this->idsOf($descending));
+    }
+
+    private function idsOf(array $jobs)
+    {
+        return array_map(function (Job $job) {
+            return $job->getId();
+        }, $jobs);
+    }
+
+    private function createClientWith(array $hashes)
+    {
+        $keys = [];
+        $contents = [];
+
+        foreach ($hashes as $id => $overrides) {
+            $keys[] = 'job:' . $id;
+            $contents['job:' . $id] = $this->createHash(array_merge(['id' => $id], $overrides));
+        }
+
+        return new FakeRedisClient($keys, $contents);
     }
 
     private function createFactory(FakeRedisClient $client)
