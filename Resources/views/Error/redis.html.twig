@@ -1,0 +1,45 @@
+{% set page = {
+    title: 'Redis unavailable',
+    description: 'The configured Redis server cannot be reached'
+} %}
+
+{% extends '@AndarisResqueWebUi/layout.html.twig' %}
+
+{% block content %}
+    <div class="col-lg-12">
+        <div class="panel panel-danger redis-unavailable">
+            <div class="panel-body text-center">
+                <span class="glyphicon glyphicon-flash" aria-hidden="true"></span>
+
+                <h1>No connection to Redis</h1>
+
+                <p class="lead">
+                    The queues, the workers and the jobs all live in Redis, so none of them can be
+                    shown while the server is out of reach.
+                </p>
+
+                <table class="table redis-unavailable-details">
+                    <tr>
+                        <th>Reported by the client</th>
+                        <td><code>{{ error }}</code></td>
+                    </tr>
+                    <tr>
+                        <th>Configuration in use</th>
+                        <td>
+                            {% if configFile %}
+                                <code>{{ configFile }}</code>
+                            {% else %}
+                                none, the defaults of php-resque apply
+                            {% endif %}
+                        </td>
+                    </tr>
+                </table>
+
+                <p class="text-muted">
+                    Check that the server is running and that the connection above is the one it
+                    listens on, then reload this page.
+                </p>
+            </div>
+        </div>
+    </div>
+{% endblock %}

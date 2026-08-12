@@ -13,6 +13,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Twig\Environment;
 
 use Andaris\ResqueWebUiBundle\Adapter\ResqueConfigurator;
+use Andaris\ResqueWebUiBundle\Exception\RedisUnavailableException;
 use Andaris\ResqueWebUiBundle\Dto\WorkerCriteria;
 use Andaris\ResqueWebUiBundle\Dto\WorkerFactory;
 
@@ -45,8 +46,14 @@ class WorkerController extends AbstractController
     {
         $criteria = WorkerCriteria::fromRequest($request);
 
+        try {
+            $workers = $this->workerFactory->createAll($criteria);
+        } catch (RedisUnavailableException $failure) {
+            return $this->renderRedisUnavailable($failure);
+        }
+
         return $this->render('@AndarisResqueWebUi/Worker/index.html.twig', [
-            'workers' => $this->workerFactory->createAll($criteria),
+            'workers' => $workers,
             'criteria' => $criteria,
         ]);
     }

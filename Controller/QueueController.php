@@ -13,6 +13,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Twig\Environment;
 
 use Andaris\ResqueWebUiBundle\Adapter\ResqueConfigurator;
+use Andaris\ResqueWebUiBundle\Exception\RedisUnavailableException;
 use Andaris\ResqueWebUiBundle\Dto\QueueCriteria;
 use Andaris\ResqueWebUiBundle\Dto\QueueFactory;
 
@@ -44,8 +45,14 @@ class QueueController extends AbstractController
     {
         $criteria = QueueCriteria::fromRequest($request);
 
+        try {
+            $queues = $this->queueFactory->createAll($criteria);
+        } catch (RedisUnavailableException $failure) {
+            return $this->renderRedisUnavailable($failure);
+        }
+
         return $this->render('@AndarisResqueWebUi/Queue/index.html.twig', [
-            'queues' => $this->queueFactory->createAll($criteria),
+            'queues' => $queues,
             'criteria' => $criteria,
         ]);
     }

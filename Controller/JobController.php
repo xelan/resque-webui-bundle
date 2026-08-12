@@ -17,6 +17,7 @@ use Andaris\ResqueWebUiBundle\Adapter\ResqueConfigurator;
 use Andaris\ResqueWebUiBundle\Dto\Job;
 use Andaris\ResqueWebUiBundle\Dto\JobCriteria;
 use Andaris\ResqueWebUiBundle\Dto\JobFactory;
+use Andaris\ResqueWebUiBundle\Exception\RedisUnavailableException;
 
 class JobController extends AbstractController
 {
@@ -49,7 +50,11 @@ class JobController extends AbstractController
 
         // the full list is read once: the counts of the filter describe every
         // job, not just the ones that are on screen
-        $jobs = $this->jobFactory->createAll($criteria);
+        try {
+            $jobs = $this->jobFactory->createAll($criteria);
+        } catch (RedisUnavailableException $failure) {
+            return $this->renderRedisUnavailable($failure);
+        }
 
         return $this->render('@AndarisResqueWebUi/Job/index.html.twig', [
             'jobs' => array_values(array_filter($jobs, [$criteria, 'matches'])),
@@ -83,7 +88,11 @@ class JobController extends AbstractController
 
     public function detailsAction($jobId)
     {
-        $job = $this->jobFactory->createById($jobId);
+        try {
+            $job = $this->jobFactory->createById($jobId);
+        } catch (RedisUnavailableException $failure) {
+            return $this->renderRedisUnavailable($failure);
+        }
 
         if ($job === null) {
             throw new NotFoundHttpException('Job not found!');

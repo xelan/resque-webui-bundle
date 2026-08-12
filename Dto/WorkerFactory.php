@@ -8,7 +8,10 @@
 
 namespace Andaris\ResqueWebUiBundle\Dto;
 
+use Predis\CommunicationException;
+
 use Andaris\ResqueWebUiBundle\Adapter\WorkerAdapter;
+use Andaris\ResqueWebUiBundle\Exception\RedisUnavailableException;
 
 class WorkerFactory
 {
@@ -41,7 +44,11 @@ class WorkerFactory
          */
         $workers = [];
 
-        $rawWorkers = $this->workerAdapter->allWorkers();
+        try {
+            $rawWorkers = $this->workerAdapter->allWorkers();
+        } catch (CommunicationException $failure) {
+            throw RedisUnavailableException::fromCommunicationFailure($failure);
+        }
 
         foreach ($rawWorkers as $worker) {
             $packet = $worker->getPacket();

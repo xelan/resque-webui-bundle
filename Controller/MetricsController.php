@@ -15,6 +15,7 @@ use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Resque\Worker;
 
 use Andaris\ResqueWebUiBundle\Adapter\ResqueConfigurator;
+use Andaris\ResqueWebUiBundle\Exception\RedisUnavailableException;
 use Andaris\ResqueWebUiBundle\Dto\QueueFactory;
 use Andaris\ResqueWebUiBundle\Dto\WorkerFactory;
 
@@ -81,8 +82,17 @@ class MetricsController extends AbstractController
      */
     public function exportPrometheusAction()
     {
-        $queues = $this->queueFactory->createAll();
-        $workers = $this->workerFactory->createAll();
+        try {
+            $queues = $this->queueFactory->createAll();
+            $workers = $this->workerFactory->createAll();
+        } catch (RedisUnavailableException $failure) {
+            // a scrape wants a status it can alert on, not a page to look at
+            return new Response(
+                '# no connection to redis: ' . $failure->getMessage() . self::LF,
+                Response::HTTP_SERVICE_UNAVAILABLE,
+                ['Content-Type' => 'text/plain']
+            );
+        }
 
         $output = $this->buildPrometheusQueueStats($queues) . self::LF . $this->buildPrometheusWorkerStats($workers);
 

@@ -8,8 +8,11 @@
 
 namespace Andaris\ResqueWebUiBundle\Dto;
 
+use Predis\CommunicationException;
+
 use Andaris\ResqueWebUiBundle\Adapter\JobAdapter;
 use Andaris\ResqueWebUiBundle\Adapter\RedisAdapter;
+use Andaris\ResqueWebUiBundle\Exception\RedisUnavailableException;
 
 class JobFactory
 {
@@ -53,7 +56,11 @@ class JobFactory
          */
         $jobs = [];
 
-        $jobKeys = $this->redisAdapter->instance()->keys('job:*');
+        try {
+            $jobKeys = $this->redisAdapter->instance()->keys('job:*');
+        } catch (CommunicationException $failure) {
+            throw RedisUnavailableException::fromCommunicationFailure($failure);
+        }
 
         foreach ($jobKeys as $key) {
             $keyArray = explode(':', $key);
@@ -75,7 +82,13 @@ class JobFactory
 
     public function createById($id)
     {
-        if (!$data = $this->redisAdapter->instance()->hgetall('job:' . $id)) {
+        try {
+            $data = $this->redisAdapter->instance()->hgetall('job:' . $id);
+        } catch (CommunicationException $failure) {
+            throw RedisUnavailableException::fromCommunicationFailure($failure);
+        }
+
+        if (!$data) {
             return null;
         }
 
