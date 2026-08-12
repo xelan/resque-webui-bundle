@@ -15,7 +15,7 @@ class DashboardController extends AbstractController
 {
     public function indexAction()
     {
-        return $this->render('AndarisResqueWebUiBundle:Dashboard:index.html.twig');
+        return $this->render('@AndarisResqueWebUi/Dashboard/index.html.twig');
     }
 
     public function aboutAction()
@@ -27,6 +27,6 @@ class DashboardController extends AbstractController
             'configFile' => $this->configurator->getConfigFile() ?: 'none, using defaults',
         ];
 
-        return $this->render('AndarisResqueWebUiBundle:Dashboard:about.html.twig', ['info' => $info]);
+        return $this->render('@AndarisResqueWebUi/Dashboard/about.html.twig', ['info' => $info]);
     }
 }

@@ -44,7 +44,7 @@ class JobController extends AbstractController
     {
         $jobs = $this->jobFactory->createAll();
 
-        return $this->render('AndarisResqueWebUiBundle:Job:index.html.twig', ['jobs' => $jobs]);
+        return $this->render('@AndarisResqueWebUi/Job/index.html.twig', ['jobs' => $jobs]);
     }
 
     public function detailsAction($jobId)
@@ -55,6 +55,6 @@ class JobController extends AbstractController
             throw new NotFoundHttpException('Job not found!');
         }
 
-        return $this->render('AndarisResqueWebUiBundle:Job:details.html.twig', ['job' => $job]);
+        return $this->render('@AndarisResqueWebUi/Job/details.html.twig', ['job' => $job]);
     }
 }

@@ -56,7 +56,7 @@ class WorkerAdapter
      *
      * @return Worker
      */
-    public function fromId($id, Logger $logger = null)
+    public function fromId($id, ?Logger $logger = null)
     {
         return Worker::fromId($id, $logger);
     }
@@ -66,7 +66,7 @@ class WorkerAdapter
      *
      * @return Worker[]
      */
-    public function allWorkers(Logger $logger = null)
+    public function allWorkers(?Logger $logger = null)
     {
         return Worker::allWorkers($logger);
     }
@@ -80,7 +80,7 @@ class WorkerAdapter
      *
      * @return Worker|false
      */
-    public function hostWorker($id, $host = null, Logger $logger = null)
+    public function hostWorker($id, $host = null, ?Logger $logger = null)
     {
         return Worker::hostWorker($id, $host, $logger);
     }
@@ -93,7 +93,7 @@ class WorkerAdapter
      *
      * @return Worker[]
      */
-    public function hostWorkers($host = null, Logger $logger = null)
+    public function hostWorkers($host = null, ?Logger $logger = null)
     {
         return Worker::hostWorkers($host, $logger);
     }
