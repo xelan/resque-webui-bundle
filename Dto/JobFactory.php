@@ -12,6 +12,7 @@ use Predis\CommunicationException;
 
 use Andaris\ResqueWebUiBundle\Adapter\JobAdapter;
 use Andaris\ResqueWebUiBundle\Adapter\RedisAdapter;
+use Andaris\ResqueWebUiBundle\Exception\JobNotRepeatableException;
 use Andaris\ResqueWebUiBundle\Exception\RedisUnavailableException;
 
 class JobFactory
@@ -79,6 +80,47 @@ class JobFactory
         return $criteria->sort($jobs);
     }
 
+
+    /**
+     * Queues the job again, as a new job of the same class on the same queue
+     * and with the same arguments.
+     *
+     * What the job is made of is read back out of its payload, which is written
+     * by whatever queued it in the first place rather than by this interface,
+     * so it is checked before anything is queued.
+     *
+     * @param Job $job
+     *
+     * @return Job the newly queued job
+     *
+     * @throws JobNotRepeatableException
+     */
+    public function recreate(Job $job)
+    {
+        $payload = json_decode((string) $job->getPayload(), true);
+
+        if (!is_array($payload)) {
+            throw JobNotRepeatableException::payloadIsNotReadable($job->getId());
+        }
+
+        if (!isset($payload['class']) || !is_string($payload['class']) || $payload['class'] === '') {
+            throw JobNotRepeatableException::payloadNamesNoClass($job->getId());
+        }
+
+        $data = isset($payload['data']) && is_array($payload['data']) ? $payload['data'] : null;
+
+        try {
+            $created = $this->jobAdapter->create($job->getQueue(), $payload['class'], $data);
+        } catch (CommunicationException $failure) {
+            throw RedisUnavailableException::fromCommunicationFailure($failure);
+        }
+
+        if ($created === null) {
+            throw JobNotRepeatableException::queueingWasRefused($job->getId());
+        }
+
+        return $this->createById($created->getId());
+    }
 
     public function createById($id)
     {

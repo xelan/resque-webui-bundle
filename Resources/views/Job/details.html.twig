@@ -5,9 +5,28 @@
 
 {% extends '@AndarisResqueWebUi/layout.html.twig' %}
 
+{% set retryFailures = {
+    'payload': 'its payload is not valid JSON',
+    'class': 'its payload does not name the class to run',
+    'refused': 'php-resque refused to queue it'
+} %}
+
 {% block content %}
     <div class="col-lg-12">
         <h1>Job Details</h1>
+
+        {% if retriedJob %}
+            <div class="alert alert-success" role="alert">
+                <span class="glyphicon glyphicon-ok-sign" aria-hidden="true"></span>
+                This job was queued again as
+                <a href="{{ path('andaris_resque_web_ui_job', {'jobId': retriedJob.id}) }}">{{ retriedJob.id }}</a>.
+            </div>
+        {% elseif retryFailure in retryFailures|keys %}
+            <div class="alert alert-danger" role="alert">
+                <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                This job could not be queued again, {{ retryFailures[retryFailure] }}.
+            </div>
+        {% endif %}
 
         <table class="table table-responsive">
             <tr>
@@ -27,7 +46,15 @@
                 <td>{{ job.worker }}</td>
             </tr>
             <tr>
-                <th>Payload <span data-copy-to-clipboard="jsonPayload"></span></th>
+                <th>
+                    Payload
+                    <span data-copy-to-clipboard="jsonPayload"></span>
+                    <button type="button" class="btn btn-primary job-retry-button" title="Queue this job again"
+                            aria-label="Queue this job again"
+                            data-toggle="modal" data-target="#jobRetryConfirmation">
+                        <i class="glyphicon glyphicon-repeat" aria-hidden="true"></i>
+                    </button>
+                </th>
                 <td>
                     <textarea id="jsonPayload" readonly="readonly" cols="80" rows="10" class="json">{{ job.payload | prettyPrintJson}}</textarea>
                 </td>
@@ -57,6 +84,34 @@
                 <td>{{ job.finished | formatTime }}</td>
             </tr>
         </table>
+
+        <div class="modal fade" id="jobRetryConfirmation" tabindex="-1" role="dialog"
+             aria-labelledby="jobRetryConfirmationTitle">
+            <div class="modal-dialog" role="document">
+                <form class="modal-content" method="post"
+                      action="{{ path('andaris_resque_web_ui_job_retry', {'jobId': job.id}) }}">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                        <h4 class="modal-title" id="jobRetryConfirmationTitle">Queue this job again?</h4>
+                    </div>
+                    <div class="modal-body">
+                        <p>
+                            A new job is placed on <strong>{{ job.queue }}</strong>, carrying out the same
+                            class with the same payload. This job here stays as it is.
+                        </p>
+                    </div>
+                    <div class="modal-footer">
+                        <input type="hidden" name="_token" value="{{ retryToken }}" />
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="glyphicon glyphicon-repeat"></i> Queue again
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
 {% endblock %}
 

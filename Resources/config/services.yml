@@ -14,6 +14,8 @@ services:
             - '@twig'
             - '@andaris_resque_web_ui.adapter.configurator'
             - '@andaris_resque_web_ui.factory.job'
+            - '@andaris_resque_web_ui.csrf_token_manager'
+            - '@router'
 
     andaris_resque_web_ui.controller.queue:
         class: Andaris\ResqueWebUiBundle\Controller\QueueController
@@ -93,6 +95,12 @@ services:
             - '@andaris_resque_web_ui.adapter.worker'
 
     ### private services ###
+
+    # the token of the retry form, where the application has no manager of its
+    # own; CsrfTokenManagerPass replaces this with the one of the application
+    andaris_resque_web_ui.csrf_token_manager:
+        class: Symfony\Component\Security\Csrf\CsrfTokenManager
+        public: false
 
     # resque adapters
     andaris_resque_web_ui.adapter.job:

@@ -9,6 +9,7 @@ Core features of the web interface are:
   - Overview of all queues (similar to bin/resque queues)
   - Overview of all jobs
   - View job details, JSON formatting and easy copy/paste of payload
+  - Queue a job again from its details page, on the same queue and with the same payload
   - Easy installation as Symfony bundle, integration (routing, security, ...)
   - Easy style customization/branding via Bootstrap3 themes and Symfony bundle overrides
 
@@ -64,4 +65,8 @@ resque:
 
 ## Usage
 The Web UI can now be accessed via http://your-application/resque/.
+
+Queueing a job again is confirmed in the browser and posted with a CSRF token. Where the
+application has CSRF protection enabled, its own token manager is used; otherwise the bundle
+falls back to one of its own, which keeps the token in the PHP session.
 

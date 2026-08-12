@@ -12,6 +12,9 @@ use PHPUnit\Framework\TestCase;
 use Resque\Job as ResqueJob;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Symfony\Component\Security\Csrf\CsrfToken;
+use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 use Twig\Environment;
 
 use Andaris\ResqueWebUiBundle\Adapter\ResqueConfigurator;
@@ -106,7 +109,7 @@ class JobControllerTest extends TestCase
         $this->expectException(NotFoundHttpException::class);
         $this->expectExceptionMessage('Job not found!');
 
-        $this->createController($factory)->detailsAction('missing');
+        $this->createController($factory)->detailsAction('missing', Request::create('/job/missing'));
     }
 
     private function renderIndex(Request $request, array $jobs)
@@ -135,7 +138,27 @@ class JobControllerTest extends TestCase
             return '';
         });
 
-        return new JobController($twig, $this->createMock(ResqueConfigurator::class), $factory);
+        return new JobController(
+            $twig,
+            $this->createMock(ResqueConfigurator::class),
+            $factory,
+            $this->createCsrf(),
+            $this->createRouter()
+        );
+    }
+
+    private function createCsrf()
+    {
+        $csrf = $this->createMock(CsrfTokenManagerInterface::class);
+        $csrf->method('getToken')->willReturn(new CsrfToken('job_retry', 'token'));
+        $csrf->method('isTokenValid')->willReturn(true);
+
+        return $csrf;
+    }
+
+    private function createRouter()
+    {
+        return $this->createMock(UrlGeneratorInterface::class);
     }
 
     private function createJob($id, $status)

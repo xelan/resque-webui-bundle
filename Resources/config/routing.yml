@@ -14,6 +14,11 @@ andaris_resque_web_ui_job:
     path:     /job/{jobId}
     defaults: { _controller: andaris_resque_web_ui.controller.job:detailsAction }
 
+andaris_resque_web_ui_job_retry:
+    path:     /job/{jobId}/retry
+    methods:  [POST]
+    defaults: { _controller: andaris_resque_web_ui.controller.job:retryAction }
+
 andaris_resque_web_ui_jobs:
     path:     /jobs
     defaults: { _controller: andaris_resque_web_ui.controller.job:indexAction }

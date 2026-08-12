@@ -12,6 +12,9 @@ use PHPUnit\Framework\TestCase;
 use Predis\Connection\ConnectionException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Symfony\Component\Security\Csrf\CsrfToken;
+use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 use Twig\Environment;
 
 use Andaris\ResqueWebUiBundle\Adapter\ResqueConfigurator;
@@ -50,13 +53,15 @@ class RedisUnavailableTest extends TestCase
         $factory = $this->createMock($factoryClass);
         $factory->method($method)->willThrowException($this->failure());
 
-        $controller = new $controllerClass(
-            $this->createTwig(),
-            $this->createMock(ResqueConfigurator::class),
-            $factory
-        );
+        $controller = $this->buildController($controllerClass, $factory);
 
-        $response = $controller->{$argument['action']}($argument['argument']);
+        $arguments = [$argument['argument']];
+
+        if (!empty($argument['request'])) {
+            $arguments[] = Request::create('/job/abc123');
+        }
+
+        $response = $controller->{$argument['action']}(...$arguments);
 
         $this->assertSame(Response::HTTP_SERVICE_UNAVAILABLE, $response->getStatusCode());
         $this->assertSame('@AndarisResqueWebUi/Error/redis.html.twig', $this->view);
@@ -88,7 +93,7 @@ class RedisUnavailableTest extends TestCase
                 JobController::class,
                 JobFactory::class,
                 'createById',
-                ['action' => 'detailsAction', 'argument' => 'abc123'],
+                ['action' => 'detailsAction', 'argument' => 'abc123', 'request' => true],
             ],
         ];
     }
@@ -151,6 +156,25 @@ class RedisUnavailableTest extends TestCase
 
         $this->assertSame(self::MESSAGE, $failure->getMessage());
         $this->assertInstanceOf(ConnectionException::class, $failure->getPrevious());
+    }
+
+    /**
+     * The job controller reaches further than the other two.
+     */
+    private function buildController($controllerClass, $factory)
+    {
+        $arguments = [$this->createTwig(), $this->createMock(ResqueConfigurator::class), $factory];
+
+        if ($controllerClass === JobController::class) {
+            $csrf = $this->createMock(CsrfTokenManagerInterface::class);
+            $csrf->method('getToken')->willReturn(new CsrfToken('job_retry', 'token'));
+            $csrf->method('isTokenValid')->willReturn(true);
+
+            $arguments[] = $csrf;
+            $arguments[] = $this->createMock(UrlGeneratorInterface::class);
+        }
+
+        return new $controllerClass(...$arguments);
     }
 
     private function failure()

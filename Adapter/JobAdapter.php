@@ -46,6 +46,20 @@ class JobAdapter
     }
 
     /**
+     * Creates a job on a queue and returns it.
+     *
+     * @param string      $queue the queue to place the job on
+     * @param string      $class the class carrying out the job
+     * @param array|null  $data  the arguments the job is carried out with
+     *
+     * @return Job|null the job, or null when queueing it was refused
+     */
+    public function create($queue, $class, ?array $data = null)
+    {
+        return Job::create($queue, $class, $data);
+    }
+
+    /**
      * Returns the Job Redis key.
      *
      * @param  Job    $job the job to get the key for
