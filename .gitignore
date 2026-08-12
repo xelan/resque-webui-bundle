@@ -28,3 +28,4 @@ thumbs.db
 
 # netbeans
 nbproject/private
+*.swp

@@ -8,27 +8,17 @@
 
 namespace Andaris\ResqueWebUiBundle\Tests\Twig;
 
-use PHPUnit\Framework\TestCase;
 use Resque\Job as ResqueJob;
-use Twig\Environment;
-use Twig\Loader\ArrayLoader;
-use Twig\TwigFunction;
 
-use Andaris\ResqueWebUiBundle\Adapter\JobAdapter;
 use Andaris\ResqueWebUiBundle\Dto\Job;
 use Andaris\ResqueWebUiBundle\Dto\JobCriteria;
-use Andaris\ResqueWebUiBundle\Twig\JobStatusFormatterExtension;
-use Andaris\ResqueWebUiBundle\Twig\TimeFormatterExtension;
 
 /**
  * Renders the job list against a stubbed layout, so that the sorting links and
  * the status filter are covered rather than only parsed.
  */
-class JobIndexTemplateTest extends TestCase
+class JobIndexTemplateTest extends ListTemplateTestCase
 {
-    const LAYOUT = '@AndarisResqueWebUi/layout.html.twig';
-    const TEMPLATE = '@AndarisResqueWebUi/Job/index.html.twig';
-
     public function testItListsTheJobs()
     {
         $output = $this->render(new JobCriteria(), [
@@ -53,7 +43,7 @@ class JobIndexTemplateTest extends TestCase
 
     public function testTheColumnInUseCarriesTheIndicator()
     {
-        $output = $this->render(new JobCriteria(null, 'queue', 'asc'), []);
+        $output = $this->render(new JobCriteria('queue', 'asc'), []);
 
         $this->assertStringContainsString('caret-up', $output);
     }
@@ -71,7 +61,7 @@ class JobIndexTemplateTest extends TestCase
 
     public function testTheSelectedStatusIsMarkedAsActive()
     {
-        $output = $this->render(new JobCriteria(ResqueJob::STATUS_FAILED), []);
+        $output = $this->render(new JobCriteria(null, null, ResqueJob::STATUS_FAILED), []);
 
         $this->assertRegExp('#<li class="active">\s*<a[^>]*>\s*Failed#', $output);
     }
@@ -81,7 +71,7 @@ class JobIndexTemplateTest extends TestCase
         $this->assertStringContainsString('No jobs found.', $this->render(new JobCriteria(), []));
         $this->assertStringContainsString(
             'No failed jobs found.',
-            $this->render(new JobCriteria(ResqueJob::STATUS_FAILED), [])
+            $this->render(new JobCriteria(null, null, ResqueJob::STATUS_FAILED), [])
         );
     }
 
@@ -89,27 +79,13 @@ class JobIndexTemplateTest extends TestCase
     {
         $counts = $counts === null ? array_fill_keys(JobCriteria::STATUSES, 0) : $counts;
 
-        $twig = new Environment(new ArrayLoader([
-            self::LAYOUT => '{% block content %}{% endblock %}',
-            self::TEMPLATE => file_get_contents(
-                dirname(dirname(__DIR__)) . '/Resources/views/Job/index.html.twig'
-            ),
-        ]));
-
-        $twig->addExtension(new TimeFormatterExtension());
-        $twig->addExtension(new JobStatusFormatterExtension(new JobAdapter()));
-        $twig->addFunction(new TwigFunction('path', function ($route, array $parameters = []) {
-            return '/' . $route . '?' . http_build_query($parameters);
-        }));
-
-        return $twig->render(self::TEMPLATE, [
+        return $this->renderTemplate('Job/index.html.twig', [
             'jobs' => $jobs,
             'criteria' => $criteria,
             'counts' => $counts,
             'total' => $total === null ? count($jobs) : $total,
         ]);
     }
-
     private function createJob($id, $status)
     {
         return new Job($id, $status, 'emails', 'host:1:default', null, null, 1500000000, null, null, null);

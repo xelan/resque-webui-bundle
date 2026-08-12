@@ -32,7 +32,7 @@ class JobCriteriaTest extends TestCase
      */
     public function testEveryColumnOfTheListCanBeSortedOn($field, $getter)
     {
-        $criteria = new JobCriteria(null, $field);
+        $criteria = new JobCriteria($field);
 
         $this->assertSame($field, $criteria->getField());
         $this->assertSame($getter, $criteria->getFieldGetter());
@@ -60,7 +60,7 @@ class JobCriteriaTest extends TestCase
      */
     public function testAnUnknownFieldFallsBackToTheDefault($field)
     {
-        $this->assertSame('created', (new JobCriteria(null, $field))->getField());
+        $this->assertSame('created', (new JobCriteria($field))->getField());
     }
 
     public function unknownFieldProvider()
@@ -79,7 +79,7 @@ class JobCriteriaTest extends TestCase
      */
     public function testOnlyAscendingTurnsOffTheDefaultDirection($direction, $expected)
     {
-        $this->assertSame($expected, (new JobCriteria(null, 'created', $direction))->getDirection());
+        $this->assertSame($expected, (new JobCriteria('created', $direction))->getDirection());
     }
 
     public function directionProvider()
@@ -97,7 +97,7 @@ class JobCriteriaTest extends TestCase
      */
     public function testTheTimestampsAndTheStatusAreComparedAsNumbers($field, $expected)
     {
-        $this->assertSame($expected, (new JobCriteria(null, $field))->isNumericField());
+        $this->assertSame($expected, (new JobCriteria($field))->isNumericField());
     }
 
     public function numericFieldProvider()
@@ -119,7 +119,7 @@ class JobCriteriaTest extends TestCase
      */
     public function testOnlyAKnownStatusIsAccepted($status, $expected)
     {
-        $this->assertSame($expected, (new JobCriteria($status))->getStatus());
+        $this->assertSame($expected, (new JobCriteria(null, null, $status))->getStatus());
     }
 
     public function statusProvider()
@@ -138,7 +138,7 @@ class JobCriteriaTest extends TestCase
 
     public function testTheColumnInUseLinksToTheOppositeDirection()
     {
-        $criteria = new JobCriteria(null, 'created', JobCriteria::DIRECTION_DESCENDING);
+        $criteria = new JobCriteria('created', JobCriteria::DIRECTION_DESCENDING);
 
         $this->assertTrue($criteria->isSortedBy('created'));
         $this->assertSame(JobCriteria::DIRECTION_ASCENDING, $criteria->getToggledDirection('created'));
@@ -146,7 +146,7 @@ class JobCriteriaTest extends TestCase
 
     public function testAnotherColumnLinksToAscending()
     {
-        $criteria = new JobCriteria(null, 'created', JobCriteria::DIRECTION_ASCENDING);
+        $criteria = new JobCriteria('created', JobCriteria::DIRECTION_ASCENDING);
 
         $this->assertFalse($criteria->isSortedBy('queue'));
         $this->assertSame(JobCriteria::DIRECTION_ASCENDING, $criteria->getToggledDirection('queue'));
@@ -182,6 +182,16 @@ class JobCriteriaTest extends TestCase
         $this->assertTrue($criteria->isDescending());
     }
 
+    /**
+     * Casting an array to int yields 1, which is a status of its own, so an
+     * array used to silently become a filter for waiting jobs.
+     */
+    public function testAnArrayStatusIsNoFilter()
+    {
+        $this->assertNull(JobCriteria::fromRequest(Request::create('/jobs?status[]=1'))->getStatus());
+        $this->assertNull((new JobCriteria(null, null, [1]))->getStatus());
+    }
+
     public function testWithoutAStatusEveryJobMatches()
     {
         $criteria = new JobCriteria();
@@ -192,7 +202,7 @@ class JobCriteriaTest extends TestCase
 
     public function testOnlyJobsOfTheSelectedStatusMatch()
     {
-        $criteria = new JobCriteria(ResqueJob::STATUS_FAILED);
+        $criteria = new JobCriteria(null, null, ResqueJob::STATUS_FAILED);
 
         $this->assertTrue($criteria->matches($this->createJob(ResqueJob::STATUS_FAILED)));
         $this->assertFalse($criteria->matches($this->createJob(ResqueJob::STATUS_COMPLETE)));
@@ -203,7 +213,7 @@ class JobCriteriaTest extends TestCase
      */
     public function testAStatusMatchesRegardlessOfItsType()
     {
-        $criteria = new JobCriteria(ResqueJob::STATUS_FAILED);
+        $criteria = new JobCriteria(null, null, ResqueJob::STATUS_FAILED);
 
         $this->assertTrue($criteria->matches($this->createJob((string) ResqueJob::STATUS_FAILED)));
     }

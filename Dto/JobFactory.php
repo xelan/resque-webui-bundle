@@ -67,57 +67,11 @@ class JobFactory
             }
         }
 
-        return $this->sort($jobs, $criteria ?: new JobCriteria());
+        $criteria = $criteria ?: new JobCriteria();
+
+        return $criteria->sort($jobs);
     }
 
-    /**
-     * Orders the jobs by the field of the criteria.
-     *
-     * Jobs without a value for that field are always put last, no matter which
-     * direction is asked for; a job that never started is of no interest at the
-     * top of the list. Jobs that compare equal are ordered by their id, so that
-     * the result does not depend on the sort implementation of the PHP version
-     * in use.
-     *
-     * @param Job[]       $jobs
-     * @param JobCriteria $criteria
-     *
-     * @return Job[]
-     */
-    private function sort(array $jobs, JobCriteria $criteria)
-    {
-        $getter = $criteria->getFieldGetter();
-        $numeric = $criteria->isNumericField();
-        $descending = $criteria->isDescending();
-
-        usort($jobs, function (Job $left, Job $right) use ($getter, $numeric, $descending) {
-            $leftValue = $left->{$getter}();
-            $rightValue = $right->{$getter}();
-
-            $leftIsEmpty = ($leftValue === null || $leftValue === '');
-            $rightIsEmpty = ($rightValue === null || $rightValue === '');
-
-            if ($leftIsEmpty || $rightIsEmpty) {
-                if ($leftIsEmpty && $rightIsEmpty) {
-                    return strcmp($left->getId(), $right->getId());
-                }
-
-                return $leftIsEmpty ? 1 : -1;
-            }
-
-            $result = $numeric
-                ? ((int) $leftValue <=> (int) $rightValue)
-                : strcmp((string) $leftValue, (string) $rightValue);
-
-            if ($result === 0) {
-                return strcmp($left->getId(), $right->getId());
-            }
-
-            return $descending ? -$result : $result;
-        });
-
-        return $jobs;
-    }
 
     public function createById($id)
     {
