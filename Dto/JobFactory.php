@@ -46,7 +46,7 @@ class JobFactory
      *
      * @return Job[]
      */
-    public function createAll(JobCriteria $criteria = null)
+    public function createAll(?JobCriteria $criteria = null)
     {
         /**
          * @var Job[]
