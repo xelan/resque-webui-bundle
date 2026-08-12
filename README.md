@@ -55,6 +55,22 @@ Configure the routing security for the bundle:
         - { path: ^/resque, roles: YOUR_ADMIN_ROLE } # e.g. ROLE_ADMIN
 ```
 
+Everyone holding that role can also queue a job again from its details page, which puts
+real work back on the queue. To let a wider group look without letting it run anything,
+put a rule for the retry in front of the general one; `access_control` matches in order,
+so the more specific rule has to come first:
+
+```yaml
+# app/config/security.yml or config/security.yml
+    access_control:
+        - { path: ^/resque/job/[^/]+/retry$, methods: [POST], roles: YOUR_ADMIN_ROLE } # e.g. ROLE_ADMIN
+        - { path: ^/resque, roles: YOUR_VIEWER_ROLE }                                  # e.g. ROLE_USER
+```
+
+The bundle sends no framing headers of its own. As the dashboard acts on what it shows,
+serving it with `X-Frame-Options: DENY` is recommended, so that a page elsewhere cannot
+put it in a frame and have someone click in it unknowingly.
+
 Enable the routing of the bundle:
 ```yaml
 # app/config/routing.yml or config/routing.yml
