@@ -6,7 +6,9 @@ on:
 
 jobs:
   tests:
-    name: PHP ${{ matrix.php }} · php-resque ${{ matrix.resque }} · twig ${{ matrix.twig || 'highest' }}
+    name: >-
+      PHP ${{ matrix.php }} · resque ${{ matrix.resque }} ·
+      twig ${{ matrix.twig || 'highest' }} · symfony ${{ matrix.symfony || 'highest' }}
     runs-on: ubuntu-latest
 
     strategy:
@@ -15,8 +17,9 @@ jobs:
         php: ['7.2', '7.3', '7.4', '8.0', '8.1', '8.2', '8.3', '8.4']
         resque: ['^2.1', '^3.0', '^4.0']
         # an empty constraint leaves the resolution to composer, which picks the
-        # highest allowed twig release
+        # highest allowed release of that package
         twig: ['']
+        symfony: ['']
         include:
           # php-resque 4 requires symfony/console ^5.4|^6.0, which drags in a
           # symfony/http-kernel that conflicts with twig < 2.13, so the legacy
@@ -30,6 +33,20 @@ jobs:
           - php: '8.4'
             resque: '^4.0'
             twig: '^2.16'
+          # the resolver always lands on the newest symfony line, so the older
+          # ones the bundle still supports need an entry of their own. The 4.4
+          # line goes with php-resque 3: symfony/http-kernel 4.4 conflicts with
+          # the symfony/console ^5.4|^6.0 that php-resque 4 requires, while the
+          # 3.4 line declares no such conflict and pairs with either
+          - php: '7.2'
+            resque: '^4.0'
+            symfony: '^3.4'
+          - php: '8.4'
+            resque: '^4.0'
+            symfony: '^3.4'
+          - php: '8.4'
+            resque: '^3.0'
+            symfony: '^4.4'
 
     steps:
       - name: Check out the code
@@ -55,6 +72,13 @@ jobs:
       - name: Select the twig version under test
         if: matrix.twig != ''
         run: composer require --no-update --no-interaction "twig/twig:${{ matrix.twig }}"
+
+      - name: Select the symfony version under test
+        if: matrix.symfony != ''
+        run: |
+          composer require --no-update --no-interaction \
+            "symfony/http-foundation:${{ matrix.symfony }}" \
+            "symfony/http-kernel:${{ matrix.symfony }}"
 
       - name: Install the dependencies
         run: composer update --prefer-dist --no-interaction --no-progress

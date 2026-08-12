@@ -14,3 +14,23 @@ td.job-id {
 td.date-time {
     font-size: small;
 }
+
+ul.job-status-filter {
+    margin-bottom: 15px;
+}
+
+ul.job-status-filter > li > a {
+    padding: 5px 12px;
+}
+
+th > a,
+th > a:hover,
+th > a:focus {
+    color: inherit;
+    text-decoration: none;
+}
+
+span.caret-up {
+    border-top: 0;
+    border-bottom: 4px solid;
+}
