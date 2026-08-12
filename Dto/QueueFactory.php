@@ -8,8 +8,11 @@
 
 namespace Andaris\ResqueWebUiBundle\Dto;
 
+use Predis\CommunicationException;
+
 use Andaris\ResqueWebUiBundle\Adapter\QueueAdapter;
 use Andaris\ResqueWebUiBundle\Adapter\RedisAdapter;
+use Andaris\ResqueWebUiBundle\Exception\RedisUnavailableException;
 
 class QueueFactory
 {
@@ -49,10 +52,18 @@ class QueueFactory
          */
         $queues = [];
 
-        $rawQueues = $this->redisAdapter->instance()->smembers('queues');
+        try {
+            $rawQueues = $this->redisAdapter->instance()->smembers('queues');
+        } catch (CommunicationException $failure) {
+            throw RedisUnavailableException::fromCommunicationFailure($failure);
+        }
 
         foreach ($rawQueues as $queue) {
-            $stats = $this->redisAdapter->instance()->hgetall($this->queueAdapter->redisKey($queue, 'stats'));
+            try {
+                $stats = $this->redisAdapter->instance()->hgetall($this->queueAdapter->redisKey($queue, 'stats'));
+            } catch (CommunicationException $failure) {
+                throw RedisUnavailableException::fromCommunicationFailure($failure);
+            }
 
             $queues[] = new Queue(
                 $queue,
