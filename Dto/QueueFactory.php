@@ -36,11 +36,13 @@ class QueueFactory
     }
 
     /**
-     * Creates an array of all queues.
+     * Creates an array of all queues, ordered by the given criteria.
+     *
+     * @param QueueCriteria $criteria
      *
      * @return Queue[]
      */
-    public function createAll()
+    public function createAll(?QueueCriteria $criteria = null)
     {
         /**
          * @var Queue[]
@@ -62,6 +64,8 @@ class QueueFactory
             );
         }
 
-        return $queues;
+        $criteria = $criteria ?: new QueueCriteria();
+
+        return $criteria->sort($queues);
     }
 }

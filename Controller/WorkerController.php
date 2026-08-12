@@ -8,9 +8,12 @@
 
 namespace Andaris\ResqueWebUiBundle\Controller;
 
+use Symfony\Component\HttpFoundation\Request;
+
 use Twig\Environment;
 
 use Andaris\ResqueWebUiBundle\Adapter\ResqueConfigurator;
+use Andaris\ResqueWebUiBundle\Dto\WorkerCriteria;
 use Andaris\ResqueWebUiBundle\Dto\WorkerFactory;
 
 class WorkerController extends AbstractController
@@ -38,10 +41,13 @@ class WorkerController extends AbstractController
         $this->workerFactory = $workerFactory;
     }
 
-    public function indexAction()
+    public function indexAction(Request $request)
     {
-        $workers = $this->workerFactory->createAll();
+        $criteria = WorkerCriteria::fromRequest($request);
 
-        return $this->render('@AndarisResqueWebUi/Worker/index.html.twig', ['workers' => $workers]);
+        return $this->render('@AndarisResqueWebUi/Worker/index.html.twig', [
+            'workers' => $this->workerFactory->createAll($criteria),
+            'criteria' => $criteria,
+        ]);
     }
 }

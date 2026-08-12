@@ -5,16 +5,8 @@
 
 {% extends '@AndarisResqueWebUi/layout.html.twig' %}
 
-{% macro sortableHeader(label, field, criteria, parameters) %}
-    <th>
-        <a href="{{ path('andaris_resque_web_ui_jobs', parameters|merge({'sort': field, 'direction': criteria.getToggledDirection(field)})) }}">
-            {{ label }}{% if criteria.isSortedBy(field) %} <span class="caret{{ criteria.descending ? '' : ' caret-up' }}"></span>{% endif %}
-        </a>
-    </th>
-{% endmacro %}
-
 {% block content %}
-    {% import _self as helper %}
+    {% import '@AndarisResqueWebUi/macros.html.twig' as helper %}
 
     {# the filter keeps the ordering, the ordering keeps the filter #}
     {% set order = {'sort': criteria.field, 'direction': criteria.direction} %}
@@ -40,14 +32,14 @@
 
         <table class="table table-striped table-responsive">
             <tr>
-                {{ helper.sortableHeader('ID', 'id', criteria, filter) }}
-                {{ helper.sortableHeader('Status', 'status', criteria, filter) }}
-                {{ helper.sortableHeader('Queue', 'queue', criteria, filter) }}
-                {{ helper.sortableHeader('Worker', 'worker', criteria, filter) }}
-                {{ helper.sortableHeader('Created', 'created', criteria, filter) }}
-                {{ helper.sortableHeader('Started', 'started', criteria, filter) }}
-                {{ helper.sortableHeader('Updated', 'updated', criteria, filter) }}
-                {{ helper.sortableHeader('Finished', 'finished', criteria, filter) }}
+                {{ helper.sortableHeader('ID', 'id', criteria, 'andaris_resque_web_ui_jobs', filter) }}
+                {{ helper.sortableHeader('Status', 'status', criteria, 'andaris_resque_web_ui_jobs', filter) }}
+                {{ helper.sortableHeader('Queue', 'queue', criteria, 'andaris_resque_web_ui_jobs', filter) }}
+                {{ helper.sortableHeader('Worker', 'worker', criteria, 'andaris_resque_web_ui_jobs', filter) }}
+                {{ helper.sortableHeader('Created', 'created', criteria, 'andaris_resque_web_ui_jobs', filter) }}
+                {{ helper.sortableHeader('Started', 'started', criteria, 'andaris_resque_web_ui_jobs', filter) }}
+                {{ helper.sortableHeader('Updated', 'updated', criteria, 'andaris_resque_web_ui_jobs', filter) }}
+                {{ helper.sortableHeader('Finished', 'finished', criteria, 'andaris_resque_web_ui_jobs', filter) }}
             </tr>
             {% for job in jobs %}
             <tr>

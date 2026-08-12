@@ -8,9 +8,12 @@
 
 namespace Andaris\ResqueWebUiBundle\Controller;
 
+use Symfony\Component\HttpFoundation\Request;
+
 use Twig\Environment;
 
 use Andaris\ResqueWebUiBundle\Adapter\ResqueConfigurator;
+use Andaris\ResqueWebUiBundle\Dto\QueueCriteria;
 use Andaris\ResqueWebUiBundle\Dto\QueueFactory;
 
 class QueueController extends AbstractController
@@ -37,10 +40,13 @@ class QueueController extends AbstractController
         $this->queueFactory = $queueFactory;
     }
 
-    public function indexAction()
+    public function indexAction(Request $request)
     {
-        $queues = $this->queueFactory->createAll();
+        $criteria = QueueCriteria::fromRequest($request);
 
-        return $this->render('@AndarisResqueWebUi/Queue/index.html.twig', ['queues' => $queues]);
+        return $this->render('@AndarisResqueWebUi/Queue/index.html.twig', [
+            'queues' => $this->queueFactory->createAll($criteria),
+            'criteria' => $criteria,
+        ]);
     }
 }

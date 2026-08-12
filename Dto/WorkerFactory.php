@@ -28,11 +28,13 @@ class WorkerFactory
     }
 
     /**
-     * Creates an array of all workers.
+     * Creates an array of all workers, ordered by the given criteria.
+     *
+     * @param WorkerCriteria $criteria
      *
      * @return Worker[]
      */
-    public function createAll()
+    public function createAll(?WorkerCriteria $criteria = null)
     {
         /**
          * @var Worker[]
@@ -60,6 +62,8 @@ class WorkerFactory
             );
         }
 
-        return $workers;
+        $criteria = $criteria ?: new WorkerCriteria();
+
+        return $criteria->sort($workers);
     }
 }

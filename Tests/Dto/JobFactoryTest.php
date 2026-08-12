@@ -135,7 +135,7 @@ class JobFactoryTest extends TestCase
      */
     public function testCreateAllOrdersTheJobsByTheGivenField($field, $direction, array $hashes, array $expected)
     {
-        $criteria = new JobCriteria(null, $field, $direction);
+        $criteria = new JobCriteria($field, $direction);
 
         $jobs = $this->createFactory($this->createClientWith($hashes))->createAll($criteria);
 
@@ -175,7 +175,7 @@ class JobFactoryTest extends TestCase
             'nine' => ['created' => '9'],
             'ten' => ['created' => '10'],
             'hundred' => ['created' => '100'],
-        ]))->createAll(new JobCriteria(null, 'created', 'asc'));
+        ]))->createAll(new JobCriteria('created', 'asc'));
 
         $this->assertSame(['nine', 'ten', 'hundred'], $this->idsOf($jobs));
     }
@@ -189,7 +189,7 @@ class JobFactoryTest extends TestCase
             'unfinished' => ['finished' => ''],
             'early' => ['finished' => '1500000100'],
             'late' => ['finished' => '1500000200'],
-        ]))->createAll(new JobCriteria(null, 'finished', $direction));
+        ]))->createAll(new JobCriteria('finished', $direction));
 
         $this->assertSame('unfinished', end($jobs)->getId(), 'the job without a value has to be last');
     }
@@ -211,9 +211,9 @@ class JobFactoryTest extends TestCase
         $hashes = ['c' => [], 'a' => [], 'b' => []];
 
         $ascending = $this->createFactory($this->createClientWith($hashes))
-            ->createAll(new JobCriteria(null, 'created', 'asc'));
+            ->createAll(new JobCriteria('created', 'asc'));
         $descending = $this->createFactory($this->createClientWith($hashes))
-            ->createAll(new JobCriteria(null, 'created', 'desc'));
+            ->createAll(new JobCriteria('created', 'desc'));
 
         $this->assertSame(['a', 'b', 'c'], $this->idsOf($ascending));
         $this->assertSame(['a', 'b', 'c'], $this->idsOf($descending));
