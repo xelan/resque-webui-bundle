@@ -26,8 +26,8 @@ use Andaris\ResqueWebUiBundle\Twig\TimeFormatterExtension;
  */
 class JobIndexTemplateTest extends TestCase
 {
-    const LAYOUT = 'AndarisResqueWebUiBundle::layout.html.twig';
-    const TEMPLATE = 'AndarisResqueWebUiBundle:Job:index.html.twig';
+    const LAYOUT = '@AndarisResqueWebUi/layout.html.twig';
+    const TEMPLATE = '@AndarisResqueWebUi/Job/index.html.twig';
 
     public function testItListsTheJobs()
     {

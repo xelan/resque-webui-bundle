@@ -41,6 +41,6 @@ class QueueController extends AbstractController
     {
         $queues = $this->queueFactory->createAll();
 
-        return $this->render('AndarisResqueWebUiBundle:Queue:index.html.twig', ['queues' => $queues]);
+        return $this->render('@AndarisResqueWebUi/Queue/index.html.twig', ['queues' => $queues]);
     }
 }

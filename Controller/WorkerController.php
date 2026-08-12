@@ -42,6 +42,6 @@ class WorkerController extends AbstractController
     {
         $workers = $this->workerFactory->createAll();
 
-        return $this->render('AndarisResqueWebUiBundle:Worker:index.html.twig', ['workers' => $workers]);
+        return $this->render('@AndarisResqueWebUi/Worker/index.html.twig', ['workers' => $workers]);
     }
 }

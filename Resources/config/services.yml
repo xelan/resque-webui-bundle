@@ -1,16 +1,15 @@
-parameters:
-    andaris_resque_web_ui_config: '%kernel.root_dir%/config/resque.yml'
-
 services:
     # controllers
     andaris_resque_web_ui.controller.dashboard:
         class: Andaris\ResqueWebUiBundle\Controller\DashboardController
+        public: true
         arguments:
             - '@twig'
             - '@andaris_resque_web_ui.adapter.configurator'
 
     andaris_resque_web_ui.controller.job:
         class: Andaris\ResqueWebUiBundle\Controller\JobController
+        public: true
         arguments:
             - '@twig'
             - '@andaris_resque_web_ui.adapter.configurator'
@@ -18,6 +17,7 @@ services:
 
     andaris_resque_web_ui.controller.queue:
         class: Andaris\ResqueWebUiBundle\Controller\QueueController
+        public: true
         arguments:
             - '@twig'
             - '@andaris_resque_web_ui.adapter.configurator'
@@ -25,6 +25,7 @@ services:
 
     andaris_resque_web_ui.controller.worker:
         class: Andaris\ResqueWebUiBundle\Controller\WorkerController
+        public: true
         arguments:
             - '@twig'
             - '@andaris_resque_web_ui.adapter.configurator'
@@ -32,6 +33,7 @@ services:
 
     andaris_resque_web_ui.controller.metrics:
         class: Andaris\ResqueWebUiBundle\Controller\MetricsController
+        public: true
         arguments:
             - '@andaris_resque_web_ui.adapter.configurator'
             - '@andaris_resque_web_ui.factory.queue'
@@ -95,22 +97,22 @@ services:
     # resque adapters
     andaris_resque_web_ui.adapter.job:
         class: Andaris\ResqueWebUiBundle\Adapter\JobAdapter
-        private: true
+        public: false
 
     andaris_resque_web_ui.adapter.queue:
         class: Andaris\ResqueWebUiBundle\Adapter\QueueAdapter
-        private: true
+        public: false
 
     andaris_resque_web_ui.adapter.redis:
         class: Andaris\ResqueWebUiBundle\Adapter\RedisAdapter
-        private: true
+        public: false
 
     andaris_resque_web_ui.adapter.worker:
         class: Andaris\ResqueWebUiBundle\Adapter\WorkerAdapter
-        private: true
+        public: false
 
     andaris_resque_web_ui.adapter.configurator:
         class: Andaris\ResqueWebUiBundle\Adapter\ResqueConfigurator
         arguments:
             - '%andaris_resque_web_ui_config%'
-        private: true
+        public: false
