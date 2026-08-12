@@ -58,6 +58,10 @@ abstract class ListTemplateTestCase extends TestCase
             return '/' . $route . '?' . http_build_query($parameters);
         }));
 
+        $twig->addFunction(new TwigFunction('asset', function ($path) {
+            return '/' . $path;
+        }));
+
         return $twig->render($name, $parameters);
     }
 
