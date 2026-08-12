@@ -63,3 +63,58 @@ table.redis-unavailable-details th {
     white-space: nowrap;
     width: 1%;
 }
+
+.dashboard-intro {
+    text-align: center;
+    margin: 20px 0 10px;
+}
+
+.dashboard-intro .lead {
+    max-width: 42em;
+    margin: 20px auto 0;
+}
+
+.dashboard-cards {
+    margin-top: 30px;
+}
+
+a.dashboard-card {
+    display: block;
+    margin-bottom: 20px;
+    padding: 35px 20px;
+    border-radius: 4px;
+    background-color: #85170f;
+    color: #ffffff;
+    text-align: center;
+    text-decoration: none;
+    transition: background-color 0.15s ease-in-out;
+}
+
+a.dashboard-card:hover,
+a.dashboard-card:focus {
+    background-color: #861f1c;
+    color: #ffffff;
+    text-decoration: none;
+}
+
+a.dashboard-card .glyphicon {
+    display: block;
+    font-size: 72px;
+    line-height: 1;
+    color: #ffffff;
+}
+
+.dashboard-card-label {
+    display: block;
+    margin-top: 20px;
+    font-size: 22px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.dashboard-card-description {
+    display: block;
+    margin-top: 8px;
+    font-size: 13px;
+    opacity: 0.85;
+}

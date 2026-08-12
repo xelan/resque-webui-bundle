@@ -5,6 +5,32 @@
 
 {% extends '@AndarisResqueWebUi/layout.html.twig' %}
 
-{% block content %}
+{% macro card(route, icon, label, description) %}
+    <div class="col-sm-4">
+        <a class="dashboard-card" href="{{ path(route) }}">
+            <span class="glyphicon glyphicon-{{ icon }}" aria-hidden="true"></span>
+            <span class="dashboard-card-label">{{ label }}</span>
+            <span class="dashboard-card-description">{{ description }}</span>
+        </a>
+    </div>
+{% endmacro %}
 
+{% block content %}
+    {% import _self as dashboard %}
+
+    <div class="dashboard-intro">
+        <img src="{{ asset('bundles/andarisresquewebui/images/logo_large.png') }}" alt="PHP-Resque Web UI Logo" />
+
+        <p class="lead">
+            This dashboard shows what your php-resque installation is up to: which workers are
+            running and what they are busy with, how much is waiting in the queues, and how the
+            individual jobs turned out.
+        </p>
+    </div>
+
+    <div class="row dashboard-cards">
+        {{ dashboard.card('andaris_resque_web_ui_workers', 'cog', 'Workers', 'The processes taking jobs off the queues') }}
+        {{ dashboard.card('andaris_resque_web_ui_queues', 'inbox', 'Queues', 'What is waiting to be worked on') }}
+        {{ dashboard.card('andaris_resque_web_ui_jobs', 'tasks', 'Jobs', 'Every job with its status and payload') }}
+    </div>
 {% endblock %}
