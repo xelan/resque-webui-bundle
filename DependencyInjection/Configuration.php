@@ -12,8 +12,6 @@ use Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
 
-use ReflectionMethod;
-
 /**
  * This is the class that validates and merges configuration from your app/config files.
  *
@@ -42,16 +40,15 @@ class Configuration implements ConfigurationInterface
     }
 
     /**
-     * Symfony 4.2 turned the root node name into a constructor argument and
-     * dropped the argument-less constructor in 5.0.
+     * Symfony 4.2 added getRootNode() and the constructor argument that creates
+     * the node it hands out, and 5.0 dropped root() and the argument-less
+     * constructor. Both halves are therefore decided by the same question.
      *
      * @return TreeBuilder
      */
     private function createTreeBuilder()
     {
-        $constructor = new ReflectionMethod(TreeBuilder::class, '__construct');
-
-        if ($constructor->getNumberOfRequiredParameters() > 0) {
+        if (method_exists(TreeBuilder::class, 'getRootNode')) {
             return new TreeBuilder(self::ROOT_NODE);
         }
 
@@ -59,8 +56,6 @@ class Configuration implements ConfigurationInterface
     }
 
     /**
-     * Symfony 4.2 added getRootNode() and removed root() in 5.0.
-     *
      * @param TreeBuilder $treeBuilder
      *
      * @return ArrayNodeDefinition
