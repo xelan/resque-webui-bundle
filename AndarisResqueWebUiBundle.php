@@ -8,7 +8,10 @@
 
 namespace Andaris\ResqueWebUiBundle;
 
+use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\HttpKernel\Bundle\Bundle;
+
+use Andaris\ResqueWebUiBundle\DependencyInjection\Compiler\CsrfTokenManagerPass;
 
 /**
  * Bundle class
@@ -16,4 +19,11 @@ use Symfony\Component\HttpKernel\Bundle\Bundle;
 class AndarisResqueWebUiBundle extends Bundle
 {
     const VERSION = '1.3.0-dev';
+
+    public function build(ContainerBuilder $container)
+    {
+        parent::build($container);
+
+        $container->addCompilerPass(new CsrfTokenManagerPass());
+    }
 }
