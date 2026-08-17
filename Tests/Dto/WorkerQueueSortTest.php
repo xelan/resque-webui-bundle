@@ -197,6 +197,41 @@ class WorkerQueueSortTest extends TestCase
     }
 
     /**
+     * Comparing the rates as whole numbers would drop everything below one
+     * percent into the same bucket, which is the range the column is there to
+     * tell apart in the first place.
+     */
+    public function testFractionsOfAPercentAreNotRoundedIntoEachOther()
+    {
+        $stats = [
+            'emails' => ['processed' => '996', 'failed' => '4'],
+            'imports' => ['processed' => '991', 'failed' => '9'],
+            'reports' => ['processed' => '994', 'failed' => '6'],
+        ];
+
+        $queues = $this->createQueueFactory(array_keys($stats), $stats)
+            ->createAll(new QueueCriteria('rate', 'asc'));
+
+        $this->assertSame(['emails', 'reports', 'imports'], $this->namesOf($queues));
+    }
+
+    /**
+     * @dataProvider directionProvider
+     */
+    public function testQueuesWithoutAnyJobsAreAlwaysLast($direction)
+    {
+        $stats = [
+            'emails' => ['processed' => '100', 'failed' => '1'],
+            'untouched' => [],
+        ];
+
+        $queues = $this->createQueueFactory(array_keys($stats), $stats)
+            ->createAll(new QueueCriteria('rate', $direction));
+
+        $this->assertSame('untouched', end($queues)->getName());
+    }
+
+    /**
      * usort is not stable before PHP 8, so equal values need a tiebreaker to
      * order the same way on every supported version.
      */

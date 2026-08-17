@@ -16,6 +16,7 @@ use Twig\TwigFunction;
 use Andaris\ResqueWebUiBundle\Adapter\JobAdapter;
 use Andaris\ResqueWebUiBundle\Adapter\WorkerAdapter;
 use Andaris\ResqueWebUiBundle\Twig\ByteFormatterExtension;
+use Andaris\ResqueWebUiBundle\Twig\FailureRateSeverityExtension;
 use Andaris\ResqueWebUiBundle\Twig\HumanTimeDiffFormatterExtension;
 use Andaris\ResqueWebUiBundle\Twig\JobStatusFormatterExtension;
 use Andaris\ResqueWebUiBundle\Twig\JsonFormatterExtension;
@@ -50,6 +51,7 @@ abstract class ListTemplateTestCase extends TestCase
         ]));
 
         $twig->addExtension(new ByteFormatterExtension());
+        $twig->addExtension(new FailureRateSeverityExtension());
         $twig->addExtension(new HumanTimeDiffFormatterExtension());
         $twig->addExtension(new TimeFormatterExtension());
         $twig->addExtension(new JobStatusFormatterExtension(new JobAdapter()));

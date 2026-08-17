@@ -213,7 +213,7 @@ abstract class SortCriteria
             }
 
             $result = $numeric
-                ? ((int) $leftValue <=> (int) $rightValue)
+                ? ((float) $leftValue <=> (float) $rightValue)
                 : strcmp((string) $leftValue, (string) $rightValue);
 
             // the column shows the opposite of what is compared here, so the

@@ -17,6 +17,7 @@ use Twig\TwigFunction;
 use Andaris\ResqueWebUiBundle\Adapter\JobAdapter;
 use Andaris\ResqueWebUiBundle\Adapter\WorkerAdapter;
 use Andaris\ResqueWebUiBundle\Twig\ByteFormatterExtension;
+use Andaris\ResqueWebUiBundle\Twig\FailureRateSeverityExtension;
 use Andaris\ResqueWebUiBundle\Twig\HumanTimeDiffFormatterExtension;
 use Andaris\ResqueWebUiBundle\Twig\JobStatusFormatterExtension;
 use Andaris\ResqueWebUiBundle\Twig\JsonFormatterExtension;
@@ -65,6 +66,7 @@ class TemplateSyntaxTest extends TestCase
         $twig = new Environment(new ArrayLoader([]));
 
         $twig->addExtension(new ByteFormatterExtension());
+        $twig->addExtension(new FailureRateSeverityExtension());
         $twig->addExtension(new HumanTimeDiffFormatterExtension());
         $twig->addExtension(new TimeFormatterExtension());
         $twig->addExtension(new JsonFormatterExtension());

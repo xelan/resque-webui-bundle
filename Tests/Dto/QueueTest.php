@@ -50,4 +50,47 @@ class QueueTest extends TestCase
 
         $this->assertSame(15, $queue->getJobsTotal());
     }
+
+    public function testTheFailureRateIsTheShareOfAllJobs()
+    {
+        $queue = new Queue('emails', 40, 0, 900, 10, 50);
+
+        $this->assertSame(5.0, $queue->getFailureRate());
+    }
+
+    /**
+     * Nothing ever ran, so there is nothing to be a share of: a rate of zero
+     * would read as a clean record the queue has not earned.
+     */
+    public function testAQueueWithoutAnyJobsHasNoFailureRate()
+    {
+        $queue = new Queue('emails', 0, 0, 0, 0, 0);
+
+        $this->assertNull($queue->getFailureRate());
+    }
+
+    public function testAQueueWithoutFailuresHasARateOfZero()
+    {
+        $queue = new Queue('emails', 0, 0, 100, 0, 0);
+
+        $this->assertSame(0.0, $queue->getFailureRate());
+    }
+
+    /**
+     * A share below one percent is exactly what the column has to tell apart,
+     * so it must not be rounded away on the way out of the queue.
+     */
+    public function testAFailureRateBelowOnePercentKeepsItsFractions()
+    {
+        $queue = new Queue('emails', 0, 0, 996, 0, 4);
+
+        $this->assertSame(0.4, $queue->getFailureRate());
+    }
+
+    public function testTheFailureRateAlsoCountsTheNumericStringsFromRedis()
+    {
+        $queue = new Queue('emails', '0', '0', '3', '0', '1');
+
+        $this->assertSame(25.0, $queue->getFailureRate());
+    }
 }

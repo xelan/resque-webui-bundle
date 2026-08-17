@@ -20,6 +20,7 @@
                 {{ helper.sortableHeader('Cancelled', 'cancelled', criteria, 'andaris_resque_web_ui_queues', {}, 'class="numeric"') }}
                 {{ helper.sortableHeader('Failed', 'failed', criteria, 'andaris_resque_web_ui_queues', {}, 'class="numeric"') }}
                 {{ helper.sortableHeader('Total', 'total', criteria, 'andaris_resque_web_ui_queues', {}, 'class="numeric"') }}
+                {{ helper.sortableHeader('Failure rate', 'rate', criteria, 'andaris_resque_web_ui_queues', {}, 'class="numeric"') }}
             </tr>
             {% for queue in queues %}
             <tr>
@@ -30,10 +31,17 @@
                 <td class="numeric">{{ queue.jobsCancelled }}</td>
                 <td class="numeric">{{ queue.jobsFailed }}</td>
                 <td class="numeric">{{ queue.jobsTotal }}</td>
+                <td class="numeric">
+                    {% if queue.failureRate is null %}
+                        <span class="text-muted">-</span>
+                    {% else %}
+                        <span class="text-{{ queue.failureRate | failureRateSeverity }}">{{ queue.failureRate | number_format(2) }} %</span>
+                    {% endif %}
+                </td>
             </tr>
             {% else %}
             <tr>
-                <td colspan="7">No queues found.</td>
+                <td colspan="8">No queues found.</td>
             </tr>
             {% endfor %}
         </table>
