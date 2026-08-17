@@ -75,6 +75,79 @@ class JobIndexTemplateTest extends ListTemplateTestCase
         );
     }
 
+    /**
+     * The queue a job ran on is the obvious way into the rest of that queue.
+     */
+    public function testTheQueueOfAJobLinksToTheJobsOfThatQueue()
+    {
+        $output = $this->render(new JobCriteria(), [
+            $this->createJob('abc123', ResqueJob::STATUS_FAILED, 'reports'),
+        ]);
+
+        $this->assertRegExp('#<td><a href="[^"]*queue=reports[^"]*">reports</a></td>#', $output);
+    }
+
+    public function testTheSortingLinksKeepTheQueueFilter()
+    {
+        $links = $this->headerLinks($this->render(new JobCriteria(null, null, null, 'emails'), []));
+
+        $this->assertNotEmpty($links);
+
+        foreach ($links as $column => $link) {
+            $this->assertStringContainsString('queue=emails', $link, $column . ' drops the queue');
+        }
+    }
+
+    public function testTheStatusPillsKeepTheQueueFilter()
+    {
+        $output = $this->render(new JobCriteria(null, null, null, 'emails'), []);
+
+        preg_match('#<ul class="nav nav-pills job-status-filter">(.*?)</ul>#s', $output, $pills);
+
+        $this->assertNotEmpty($pills, 'the status filter is not rendered');
+
+        preg_match_all('#<a href="([^"]+)"#', $pills[1], $links);
+
+        $this->assertCount(count(JobCriteria::STATUSES) + 1, $links[1], 'a pill is missing');
+
+        foreach ($links[1] as $link) {
+            $this->assertStringContainsString('queue=emails', $link, $link . ' drops the queue');
+        }
+    }
+
+    /**
+     * A filtered list that does not say so is a list that looks incomplete, so
+     * the queue is named along with the way back out of it.
+     */
+    public function testTheSelectedQueueIsNamedWithAWayBack()
+    {
+        $output = $this->render(new JobCriteria(null, null, ResqueJob::STATUS_FAILED, 'emails'), []);
+
+        $this->assertRegExp('#Showing the jobs on the queue <strong>emails</strong>#', $output);
+        $this->assertRegExp(
+            '#<a href="(?![^"]*queue=)[^"]*status=' . ResqueJob::STATUS_FAILED . '[^"]*">Show every queue</a>#',
+            $output,
+            'the way back has to drop the queue and keep the status'
+        );
+    }
+
+    public function testTheListOfEveryQueueDoesNotClaimToBeFiltered()
+    {
+        $this->assertStringNotContainsString('Show every queue', $this->render(new JobCriteria(), []));
+    }
+
+    public function testTheEmptyListMentionsTheQueue()
+    {
+        $this->assertStringContainsString(
+            'No jobs found on the queue emails.',
+            $this->render(new JobCriteria(null, null, null, 'emails'), [])
+        );
+        $this->assertStringContainsString(
+            'No failed jobs found on the queue emails.',
+            $this->render(new JobCriteria(null, null, ResqueJob::STATUS_FAILED, 'emails'), [])
+        );
+    }
+
     private function render(JobCriteria $criteria, array $jobs, array $counts = null, $total = null)
     {
         $counts = $counts === null ? array_fill_keys(JobCriteria::STATUSES, 0) : $counts;
@@ -86,8 +159,9 @@ class JobIndexTemplateTest extends ListTemplateTestCase
             'total' => $total === null ? count($jobs) : $total,
         ]);
     }
-    private function createJob($id, $status)
+
+    private function createJob($id, $status, $queue = 'emails')
     {
-        return new Job($id, $status, 'emails', 'host:1:default', null, null, 1500000000, null, null, null);
+        return new Job($id, $status, $queue, 'host:1:default', null, null, 1500000000, null, null, null);
     }
 }

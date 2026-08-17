@@ -12,11 +12,14 @@ use Resque\Job as ResqueJob;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
- * The ordering and the status filter of the job list.
+ * The ordering and the filters of the job list.
  *
- * The values end up selecting a getter and are taken from the query string, so
- * everything is checked against a whitelist. An unknown value falls back to the
- * default instead of being rejected, which keeps a stale bookmark working.
+ * The ordering ends up selecting a getter and is taken from the query string,
+ * so it is checked against a whitelist. An unknown value falls back to the
+ * default instead of being rejected, which keeps a stale bookmark working. The
+ * queue is the exception: it never names a getter and never becomes a Redis
+ * key, it is only ever held against the queue of a job, so it is taken as it
+ * comes as long as it is a string at all.
  *
  * @internal the lists of the bundle are rendered through this; it is not an
  *           extension point and may change without notice
@@ -65,13 +68,19 @@ class JobCriteria extends SortCriteria
     private $status;
 
     /**
+     * @var string|null
+     */
+    private $queue;
+
+    /**
      * Constructor.
      *
-     * @param string   $field     one of the FIELDS keys
-     * @param string   $direction one of the DIRECTION_* constants
-     * @param int|null $status    one of the STATUSES, null for all jobs
+     * @param string      $field     one of the FIELDS keys
+     * @param string      $direction one of the DIRECTION_* constants
+     * @param int|null    $status    one of the STATUSES, null for all jobs
+     * @param string|null $queue     the queue to show, null for all of them
      */
-    public function __construct($field = null, $direction = null, $status = null)
+    public function __construct($field = null, $direction = null, $status = null, $queue = null)
     {
         parent::__construct($field, $direction);
 
@@ -79,6 +88,12 @@ class JobCriteria extends SortCriteria
         $isKnownStatus = is_scalar($status) && in_array((int) $status, self::STATUSES, true);
 
         $this->status = $isKnownStatus ? (int) $status : null;
+
+        // a query string carries arrays just as happily as it carries strings,
+        // and no queue is named by one
+        $isUsableQueue = is_scalar($queue) && (string) $queue !== '';
+
+        $this->queue = $isUsableQueue ? (string) $queue : null;
     }
 
     /**
@@ -93,7 +108,8 @@ class JobCriteria extends SortCriteria
         return new self(
             $request->query->get('sort'),
             $request->query->get('direction'),
-            $request->query->get('status')
+            $request->query->get('status'),
+            $request->query->get('queue')
         );
     }
 
@@ -107,12 +123,48 @@ class JobCriteria extends SortCriteria
         return $this->status;
     }
 
+    /**
+     * Returns the queue to filter on, or null when every queue is shown.
+     *
+     * @return string|null
+     */
+    public function getQueue()
+    {
+        return $this->queue;
+    }
 
+    /**
+     * Returns the status filter as query parameters, for the links that pick a
+     * queue of their own.
+     *
+     * @return array
+     */
+    public function getStatusParameters()
+    {
+        return $this->status === null ? [] : ['status' => $this->status];
+    }
 
+    /**
+     * Returns the queue filter as query parameters, for the links that pick a
+     * status of their own.
+     *
+     * @return array
+     */
+    public function getQueueParameters()
+    {
+        return $this->queue === null ? [] : ['queue' => $this->queue];
+    }
 
-
-
-
+    /**
+     * Returns every filter as query parameters, so that a link keeps what is on
+     * screen without having to know which filters there are.
+     *
+     * @return array
+     */
+    public function getFilterParameters()
+    {
+        return array_merge($this->getStatusParameters(), $this->getQueueParameters());
+    }
 
     /**
      * Returns whether a job passes the status filter.
@@ -121,8 +173,36 @@ class JobCriteria extends SortCriteria
      *
      * @return bool
      */
-    public function matches(Job $job)
+    public function matchesStatus(Job $job)
     {
         return $this->status === null || (int) $job->getStatus() === $this->status;
+    }
+
+    /**
+     * Returns whether a job passes the queue filter.
+     *
+     * @param Job $job
+     *
+     * @return bool
+     */
+    public function matchesQueue(Job $job)
+    {
+        return $this->queue === null || (string) $job->getQueue() === $this->queue;
+    }
+
+
+
+
+
+    /**
+     * Returns whether a job passes every filter.
+     *
+     * @param Job $job
+     *
+     * @return bool
+     */
+    public function matches(Job $job)
+    {
+        return $this->matchesQueue($job) && $this->matchesStatus($job);
     }
 }

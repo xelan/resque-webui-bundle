@@ -53,10 +53,10 @@ class JobControllerTest extends TestCase
     }
 
     /**
-     * The counts next to the filter describe every job, not the ones that are
-     * left after filtering.
+     * The counts next to the filter describe every job there is to pick from,
+     * not the ones that are left after picking a status.
      */
-    public function testTheCountsCoverEveryStatusRegardlessOfTheFilter()
+    public function testTheCountsCoverEveryStatusRegardlessOfTheStatusFilter()
     {
         $this->renderIndex(Request::create('/jobs?status=' . ResqueJob::STATUS_FAILED), [
             $this->createJob('a', ResqueJob::STATUS_FAILED),
@@ -68,6 +68,53 @@ class JobControllerTest extends TestCase
         $this->assertSame(1, $this->parameters['counts'][ResqueJob::STATUS_COMPLETE]);
         $this->assertSame(0, $this->parameters['counts'][ResqueJob::STATUS_WAITING]);
         $this->assertSame(3, $this->parameters['total']);
+    }
+
+    public function testOnlyTheJobsOfTheSelectedQueueAreShown()
+    {
+        $this->renderIndex(Request::create('/jobs?queue=emails'), [
+            $this->createJob('a', ResqueJob::STATUS_FAILED, 'emails'),
+            $this->createJob('b', ResqueJob::STATUS_FAILED, 'reports'),
+            $this->createJob('c', ResqueJob::STATUS_COMPLETE, 'emails'),
+        ]);
+
+        $this->assertSame(['a', 'c'], $this->renderedJobIds());
+    }
+
+    public function testTheQueueFilterAndTheStatusFilterApplyTogether()
+    {
+        $this->renderIndex(Request::create('/jobs?queue=emails&status=' . ResqueJob::STATUS_FAILED), [
+            $this->createJob('a', ResqueJob::STATUS_FAILED, 'emails'),
+            $this->createJob('b', ResqueJob::STATUS_FAILED, 'reports'),
+            $this->createJob('c', ResqueJob::STATUS_COMPLETE, 'emails'),
+        ]);
+
+        $this->assertSame(['a'], $this->renderedJobIds());
+    }
+
+    /**
+     * The counts sit above a list that shows one queue, so counting the jobs of
+     * every queue would have them contradict the table below them.
+     */
+    public function testTheCountsAndTheTotalDescribeTheSelectedQueue()
+    {
+        $this->renderIndex(Request::create('/jobs?queue=emails&status=' . ResqueJob::STATUS_FAILED), [
+            $this->createJob('a', ResqueJob::STATUS_FAILED, 'emails'),
+            $this->createJob('b', ResqueJob::STATUS_FAILED, 'reports'),
+            $this->createJob('c', ResqueJob::STATUS_COMPLETE, 'emails'),
+            $this->createJob('d', ResqueJob::STATUS_COMPLETE, 'reports'),
+        ]);
+
+        $this->assertSame(1, $this->parameters['counts'][ResqueJob::STATUS_FAILED]);
+        $this->assertSame(1, $this->parameters['counts'][ResqueJob::STATUS_COMPLETE]);
+        $this->assertSame(2, $this->parameters['total']);
+    }
+
+    public function testTheQueueIsHandedToTheTemplateThroughTheCriteria()
+    {
+        $this->renderIndex(Request::create('/jobs?queue=emails'), []);
+
+        $this->assertSame('emails', $this->parameters['criteria']->getQueue());
     }
 
     public function testEveryStatusIsListedEvenWithoutJobs()
@@ -161,8 +208,8 @@ class JobControllerTest extends TestCase
         return $this->createMock(UrlGeneratorInterface::class);
     }
 
-    private function createJob($id, $status)
+    private function createJob($id, $status, $queue = 'emails')
     {
-        return new Job($id, $status, 'emails', null, null, null, 1500000000, null, null, null);
+        return new Job($id, $status, $queue, null, null, null, 1500000000, null, null, null);
     }
 }

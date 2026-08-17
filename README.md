@@ -6,8 +6,8 @@ This Symfony bundle provides a web interface for [mjphaynes/php-resque](https://
 
 Core features of the web interface are:
   - Overview of running workers (similar to bin/resque workers)
-  - Overview of all queues (similar to bin/resque queues)
-  - Overview of all jobs
+  - Overview of all queues (similar to bin/resque queues), with the share of jobs that failed
+  - Overview of all jobs, filtered by status and by queue
   - View job details, JSON formatting and easy copy/paste of payload
   - Queue a job again from its details page, on the same queue and with the same payload
   - Easy installation as Symfony bundle, integration (routing, security, ...)
