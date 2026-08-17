@@ -50,4 +50,10 @@ class WorkerCriteria extends SortCriteria
         'timeout',
         'memory',
     ];
+
+    /**
+     * The start time sits behind the "Running for" column, which shows how long
+     * ago it was: the earlier a worker started, the longer it has been running.
+     */
+    const INVERTED_FIELDS = ['started'];
 }

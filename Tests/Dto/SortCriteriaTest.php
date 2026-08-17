@@ -93,6 +93,28 @@ class SortCriteriaTest extends TestCase
     /**
      * @dataProvider criteriaProvider
      */
+    public function testTheInvertedFieldsAreTheOnlyOnesRunningOppositeToTheirColumn($class)
+    {
+        $fields = array_keys(constant($class . '::FIELDS'));
+        $inverted = constant($class . '::INVERTED_FIELDS');
+
+        $this->assertEmpty(
+            array_diff($inverted, $fields),
+            'a field is inverted but cannot be sorted on'
+        );
+
+        foreach ($fields as $field) {
+            $this->assertSame(
+                in_array($field, $inverted, true),
+                (new $class($field))->isInvertedField(),
+                $field . ' does not agree with the list of inverted fields'
+            );
+        }
+    }
+
+    /**
+     * @dataProvider criteriaProvider
+     */
     public function testWhatIdentifiesAnEntryIsASortableFieldAsWell($class)
     {
         $fields = constant($class . '::FIELDS');
