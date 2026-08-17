@@ -143,4 +143,26 @@ class Queue
 
         return array_sum($jobNumbers);
     }
+
+    /**
+     * Returns the share of the jobs of the Queue that failed, in percent.
+     *
+     * A queue that has never seen a job has no rate rather than a rate of
+     * zero, so that the column stays empty instead of claiming a clean record
+     * for a queue nothing ever ran on.
+     *
+     * @return float|null
+     */
+    public function getFailureRate()
+    {
+        $total = $this->getJobsTotal();
+
+        if ($total === 0) {
+            return null;
+        }
+
+        // an even division of two integers comes back as an integer in PHP,
+        // and the column is a rate whatever the numbers behind it happen to be
+        return (float) ((int) $this->jobsFailed / $total * 100);
+    }
 }

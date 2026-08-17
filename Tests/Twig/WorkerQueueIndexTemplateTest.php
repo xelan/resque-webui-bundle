@@ -61,6 +61,7 @@ class WorkerQueueIndexTemplateTest extends ListTemplateTestCase
             'Cancelled' => 'cancelled',
             'Failed' => 'failed',
             'Total' => 'total',
+            'Failure rate' => 'rate',
         ];
 
         foreach ($expected as $label => $field) {
@@ -148,7 +149,9 @@ class WorkerQueueIndexTemplateTest extends ListTemplateTestCase
     {
         $output = $this->renderQueues(new QueueCriteria(), [new Queue('emails', 1, 2, 3, 4, 5)]);
 
-        foreach (['Queued', 'Delayed', 'Processed', 'Cancelled', 'Failed', 'Total'] as $label) {
+        $labels = ['Queued', 'Delayed', 'Processed', 'Cancelled', 'Failed', 'Total', 'Failure rate'];
+
+        foreach ($labels as $label) {
             $this->assertRegExp(
                 '#<th class="numeric"[^>]*>\s*<a href="[^"]+">\s*' . $label . '#',
                 $output,
@@ -156,7 +159,32 @@ class WorkerQueueIndexTemplateTest extends ListTemplateTestCase
             );
         }
 
-        $this->assertSame(6, substr_count($output, '<td class="numeric">'));
+        $this->assertSame(count($labels), substr_count($output, '<td class="numeric">'));
+    }
+
+    /**
+     * A bare failure count says nothing without the number of jobs it is out
+     * of, so the share carries the colour that ranks it.
+     */
+    public function testTheFailureRateIsColouredByHowBadItIs()
+    {
+        $output = $this->renderQueues(new QueueCriteria(), [
+            new Queue('healthy', 0, 0, 1000, 0, 4),
+            new Queue('shaky', 0, 0, 950, 0, 50),
+            new Queue('broken', 0, 0, 700, 0, 300),
+        ]);
+
+        $this->assertStringContainsString('<span class="text-success">0.40 %</span>', $output);
+        $this->assertStringContainsString('<span class="text-warning">5.00 %</span>', $output);
+        $this->assertStringContainsString('<span class="text-danger">30.00 %</span>', $output);
+    }
+
+    public function testAQueueWithoutAnyJobsShowsNoFailureRate()
+    {
+        $output = $this->renderQueues(new QueueCriteria(), [new Queue('untouched', 0, 0, 0, 0, 0)]);
+
+        $this->assertStringContainsString('<span class="text-muted">-</span>', $output);
+        $this->assertStringNotContainsString('0.00 %', $output);
     }
 
     /**

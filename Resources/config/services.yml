@@ -69,6 +69,11 @@ services:
         tags:
             -  { name: twig.extension }
 
+    andaris_resque_web_ui.twig.failure_rate_severity:
+        class: Andaris\ResqueWebUiBundle\Twig\FailureRateSeverityExtension
+        tags:
+            -  { name: twig.extension }
+
     andaris_resque_web_ui.twig.job_status_formatter:
         class: Andaris\ResqueWebUiBundle\Twig\JobStatusFormatterExtension
         arguments:

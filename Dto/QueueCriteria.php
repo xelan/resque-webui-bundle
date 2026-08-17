@@ -32,6 +32,7 @@ class QueueCriteria extends SortCriteria
         'cancelled' => 'getJobsCancelled',
         'failed' => 'getJobsFailed',
         'total' => 'getJobsTotal',
+        'rate' => 'getFailureRate',
     ];
 
     /**
@@ -44,5 +45,6 @@ class QueueCriteria extends SortCriteria
         'cancelled',
         'failed',
         'total',
+        'rate',
     ];
 }
