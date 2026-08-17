@@ -1,9 +1,11 @@
 {#
     Internal: the column headers of the lists of the bundle are rendered here.
     The attributes are written out unescaped, so they take fixed markup only.
+    They are printed on their own rather than concatenated into the tag: the
+    escaper only honours the raw filter when it ends the expression it prints.
 #}
 {% macro sortableHeader(label, field, criteria, route, parameters, attributes) %}
-    <th{{ attributes is defined and attributes ? ' ' ~ attributes|raw : '' }}>
+    <th{% if attributes is defined and attributes %} {{ attributes|raw }}{% endif %}>
         <a href="{{ path(route, (parameters|default({}))|merge({'sort': field, 'direction': criteria.getToggledDirection(field)})) }}">
             {{ label }}{% if criteria.isSortedBy(field) %} <span class="caret{{ criteria.descending ? '' : ' caret-up' }}"></span>{% endif %}
         </a>

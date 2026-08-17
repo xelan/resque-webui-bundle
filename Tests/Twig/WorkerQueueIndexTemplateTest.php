@@ -89,6 +89,18 @@ class WorkerQueueIndexTemplateTest extends ListTemplateTestCase
         $this->assertRegExp('#Total\s*<span class="caret"></span>#', $output);
     }
 
+    /**
+     * The attributes of a column are fixed markup handed to the macro, so they
+     * have to reach the tag as markup rather than as text.
+     */
+    public function testTheAttributesOfAColumnReachTheHeaderUnescaped()
+    {
+        $output = $this->renderWorkers(new WorkerCriteria(), []);
+
+        $this->assertStringContainsString('<th title="Processed" style="width: 4em">', $output);
+        $this->assertStringNotContainsString('&quot;', $output);
+    }
+
     public function testTheWorkerColumnInUseCarriesTheIndicator()
     {
         $output = $this->renderWorkers(new WorkerCriteria('id', 'asc'), []);
