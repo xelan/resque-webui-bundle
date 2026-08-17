@@ -15,6 +15,11 @@ td.date-time {
     font-size: small;
 }
 
+th.numeric,
+td.numeric {
+    text-align: right;
+}
+
 ul.job-status-filter {
     margin-bottom: 15px;
 }
