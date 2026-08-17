@@ -87,6 +87,29 @@ class QueueTest extends TestCase
         $this->assertSame(0.4, $queue->getFailureRate());
     }
 
+    /**
+     * The queued and the delayed counters are gauges php-resque counts back
+     * down, so a stats hash cleared while jobs were in flight can add up to
+     * less than nothing. A negative share is no share at all.
+     *
+     * @dataProvider brokenCounterProvider
+     */
+    public function testAQueueWhoseCountersDoNotAddUpHasNoFailureRate($queued, $failed)
+    {
+        $queue = new Queue('emails', $queued, 0, 10, 0, $failed);
+
+        $this->assertNull($queue->getFailureRate());
+    }
+
+    public function brokenCounterProvider()
+    {
+        return [
+            'the counters cancel out' => [-15, 5],
+            'more was taken off than was ever added' => [-50, 5],
+            'nothing is left and nothing failed' => [-10, 0],
+        ];
+    }
+
     public function testTheFailureRateAlsoCountsTheNumericStringsFromRedis()
     {
         $queue = new Queue('emails', '0', '0', '3', '0', '1');

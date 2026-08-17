@@ -151,13 +151,19 @@ class Queue
      * zero, so that the column stays empty instead of claiming a clean record
      * for a queue nothing ever ran on.
      *
+     * The queued and the delayed counters are gauges that php-resque counts
+     * back down again, so a stats hash that was cleared while jobs were still
+     * in flight can add up to less than nothing. There is no share to report
+     * from that either, and reporting one would put a negative percentage on
+     * screen in the colour of a healthy queue.
+     *
      * @return float|null
      */
     public function getFailureRate()
     {
         $total = $this->getJobsTotal();
 
-        if ($total === 0) {
+        if ($total <= 0) {
             return null;
         }
 

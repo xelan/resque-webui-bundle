@@ -35,7 +35,11 @@
                     {% if queue.failureRate is null %}
                         <span class="text-muted">-</span>
                     {% else %}
-                        <span class="text-{{ queue.failureRate | failureRateSeverity }}">{{ queue.failureRate | number_format(2) }} %</span>
+                        {# the colour has to rank the number that is on screen:
+                           0.9999 is shown as 1.00 and must not read as green
+                           while saying it reached the first threshold #}
+                        {% set shown = queue.failureRate | round(2) %}
+                        <span class="text-{{ shown | failureRateSeverity }}">{{ shown | number_format(2) }} %</span>
                     {% endif %}
                 </td>
             </tr>
