@@ -18,7 +18,7 @@ use Andaris\ResqueWebUiBundle\DependencyInjection\Compiler\CsrfTokenManagerPass;
  */
 class AndarisResqueWebUiBundle extends Bundle
 {
-    const VERSION = '1.3.0-dev';
+    const VERSION = '1.4.0';
 
     public function build(ContainerBuilder $container)
     {
