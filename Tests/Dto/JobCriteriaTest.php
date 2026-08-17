@@ -169,6 +169,7 @@ class JobCriteriaTest extends TestCase
         $criteria = JobCriteria::fromRequest(Request::create('/jobs'));
 
         $this->assertNull($criteria->getStatus());
+        $this->assertNull($criteria->getQueue());
         $this->assertSame('created', $criteria->getField());
         $this->assertTrue($criteria->isDescending());
     }
@@ -218,8 +219,97 @@ class JobCriteriaTest extends TestCase
         $this->assertTrue($criteria->matches($this->createJob((string) ResqueJob::STATUS_FAILED)));
     }
 
-    private function createJob($status)
+    public function testWithoutAQueueEveryJobMatches()
     {
-        return new Job('abc123', $status, 'emails', null, null, null, null, null, null, null);
+        $criteria = new JobCriteria();
+
+        $this->assertTrue($criteria->matches($this->createJob(ResqueJob::STATUS_FAILED, 'emails')));
+        $this->assertTrue($criteria->matches($this->createJob(ResqueJob::STATUS_FAILED, 'reports')));
+    }
+
+    public function testOnlyJobsOfTheSelectedQueueMatch()
+    {
+        $criteria = new JobCriteria(null, null, null, 'emails');
+
+        $this->assertTrue($criteria->matches($this->createJob(ResqueJob::STATUS_FAILED, 'emails')));
+        $this->assertFalse($criteria->matches($this->createJob(ResqueJob::STATUS_FAILED, 'reports')));
+    }
+
+    /**
+     * Neither filter is allowed to let a job through that the other one keeps
+     * out.
+     */
+    public function testTheStatusFilterAndTheQueueFilterApplyTogether()
+    {
+        $criteria = new JobCriteria(null, null, ResqueJob::STATUS_FAILED, 'emails');
+
+        $this->assertTrue($criteria->matches($this->createJob(ResqueJob::STATUS_FAILED, 'emails')));
+        $this->assertFalse($criteria->matches($this->createJob(ResqueJob::STATUS_COMPLETE, 'emails')));
+        $this->assertFalse($criteria->matches($this->createJob(ResqueJob::STATUS_FAILED, 'reports')));
+    }
+
+    public function testTheQueueIsReadFromTheQueryString()
+    {
+        $criteria = JobCriteria::fromRequest(Request::create('/jobs?queue=emails&status=6&sort=queue'));
+
+        $this->assertSame('emails', $criteria->getQueue());
+        $this->assertSame(ResqueJob::STATUS_FAILED, $criteria->getStatus());
+    }
+
+    /**
+     * A query string carries arrays just as happily as it carries strings, and
+     * no queue is named by one.
+     */
+    public function testAnArrayQueueIsNoFilter()
+    {
+        $this->assertNull(JobCriteria::fromRequest(Request::create('/jobs?queue[]=emails'))->getQueue());
+        $this->assertNull((new JobCriteria(null, null, null, ['emails']))->getQueue());
+    }
+
+    public function testAnEmptyQueueIsNoFilter()
+    {
+        $this->assertNull(JobCriteria::fromRequest(Request::create('/jobs?queue='))->getQueue());
+        $this->assertNull((new JobCriteria(null, null, null, ''))->getQueue());
+    }
+
+    /**
+     * @dataProvider filterParameterProvider
+     */
+    public function testTheFilterParametersCarryWhatIsFilteredOn($status, $queue, array $expected)
+    {
+        $criteria = new JobCriteria(null, null, $status, $queue);
+
+        $this->assertSame($expected, $criteria->getFilterParameters());
+    }
+
+    public function filterParameterProvider()
+    {
+        return [
+            'nothing' => [null, null, []],
+            'a status' => [ResqueJob::STATUS_FAILED, null, ['status' => ResqueJob::STATUS_FAILED]],
+            'a queue' => [null, 'emails', ['queue' => 'emails']],
+            'both' => [
+                ResqueJob::STATUS_FAILED,
+                'emails',
+                ['status' => ResqueJob::STATUS_FAILED, 'queue' => 'emails'],
+            ],
+        ];
+    }
+
+    /**
+     * A link that sets one filter has to keep the other one, and only the other
+     * one.
+     */
+    public function testEachFilterIsAvailableOnItsOwn()
+    {
+        $criteria = new JobCriteria(null, null, ResqueJob::STATUS_FAILED, 'emails');
+
+        $this->assertSame(['status' => ResqueJob::STATUS_FAILED], $criteria->getStatusParameters());
+        $this->assertSame(['queue' => 'emails'], $criteria->getQueueParameters());
+    }
+
+    private function createJob($status, $queue = 'emails')
+    {
+        return new Job('abc123', $status, $queue, null, null, null, null, null, null, null);
     }
 }

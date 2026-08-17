@@ -195,7 +195,21 @@ class WorkerQueueIndexTemplateTest extends ListTemplateTestCase
         $output = $this->renderQueues(new QueueCriteria(), [new Queue('emails', 1, 2, 3, 4, 5)]);
 
         $this->assertRegExp('#<th>\s*<a href="[^"]+">\s*Name#', $output);
-        $this->assertStringContainsString('<td>emails</td>', $output);
+        $this->assertRegExp('#<td><a [^>]+>emails</a></td>#', $output);
+    }
+
+    /**
+     * The queue list says how much work a queue carries; the jobs behind those
+     * numbers are one click away.
+     */
+    public function testTheQueueNameLinksToItsJobs()
+    {
+        $output = $this->renderQueues(new QueueCriteria(), [new Queue('emails', 1, 2, 3, 4, 5)]);
+
+        $this->assertRegExp(
+            '#<td><a href="/andaris_resque_web_ui_jobs\?queue=emails">emails</a></td>#',
+            $output
+        );
     }
 
     private function renderWorkers(WorkerCriteria $criteria, array $workers)

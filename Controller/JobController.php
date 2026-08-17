@@ -74,18 +74,22 @@ class JobController extends AbstractController
         $criteria = JobCriteria::fromRequest($request);
 
         // the full list is read once: the counts of the filter describe every
-        // job, not just the ones that are on screen
+        // job of the queue in view, not just the ones that are on screen
         try {
             $jobs = $this->jobFactory->createAll($criteria);
         } catch (RedisUnavailableException $failure) {
             return $this->renderRedisUnavailable($failure);
         }
 
+        // the queue is narrowed down first, so that the counts describe what
+        // the status filter picks from rather than contradicting the table
+        $onQueue = array_values(array_filter($jobs, [$criteria, 'matchesQueue']));
+
         return $this->render('@AndarisResqueWebUi/Job/index.html.twig', [
-            'jobs' => array_values(array_filter($jobs, [$criteria, 'matches'])),
+            'jobs' => array_values(array_filter($onQueue, [$criteria, 'matchesStatus'])),
             'criteria' => $criteria,
-            'counts' => $this->countByStatus($jobs),
-            'total' => count($jobs),
+            'counts' => $this->countByStatus($onQueue),
+            'total' => count($onQueue),
         ]);
     }
 

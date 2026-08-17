@@ -24,7 +24,7 @@
             </tr>
             {% for queue in queues %}
             <tr>
-                <td>{{ queue.name }}</td>
+                <td><a href="{{ path('andaris_resque_web_ui_jobs', {'queue': queue.name}) }}">{{ queue.name }}</a></td>
                 <td class="numeric">{{ queue.jobsQueued }}</td>
                 <td class="numeric">{{ queue.jobsDelayed }}</td>
                 <td class="numeric">{{ queue.jobsProcessed }}</td>

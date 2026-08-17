@@ -28,6 +28,10 @@ ul.job-status-filter > li > a {
     padding: 5px 12px;
 }
 
+p.job-queue-filter {
+    margin-bottom: 15px;
+}
+
 th > a,
 th > a:hover,
 th > a:focus {
