@@ -14,26 +14,26 @@
         <table class="table table-striped table-responsive">
             <tr>
                 {{ helper.sortableHeader('Name', 'name', criteria, 'andaris_resque_web_ui_queues') }}
-                {{ helper.sortableHeader('Queued', 'queued', criteria, 'andaris_resque_web_ui_queues') }}
-                {{ helper.sortableHeader('Delayed', 'delayed', criteria, 'andaris_resque_web_ui_queues') }}
-                {{ helper.sortableHeader('Processed', 'processed', criteria, 'andaris_resque_web_ui_queues') }}
-                {{ helper.sortableHeader('Cancelled', 'cancelled', criteria, 'andaris_resque_web_ui_queues') }}
-                {{ helper.sortableHeader('Failed', 'failed', criteria, 'andaris_resque_web_ui_queues') }}
-                {{ helper.sortableHeader('Total', 'total', criteria, 'andaris_resque_web_ui_queues') }}
+                {{ helper.sortableHeader('Queued', 'queued', criteria, 'andaris_resque_web_ui_queues', {}, 'class="numeric"') }}
+                {{ helper.sortableHeader('Delayed', 'delayed', criteria, 'andaris_resque_web_ui_queues', {}, 'class="numeric"') }}
+                {{ helper.sortableHeader('Processed', 'processed', criteria, 'andaris_resque_web_ui_queues', {}, 'class="numeric"') }}
+                {{ helper.sortableHeader('Cancelled', 'cancelled', criteria, 'andaris_resque_web_ui_queues', {}, 'class="numeric"') }}
+                {{ helper.sortableHeader('Failed', 'failed', criteria, 'andaris_resque_web_ui_queues', {}, 'class="numeric"') }}
+                {{ helper.sortableHeader('Total', 'total', criteria, 'andaris_resque_web_ui_queues', {}, 'class="numeric"') }}
             </tr>
             {% for queue in queues %}
             <tr>
                 <td>{{ queue.name }}</td>
-                <td>{{ queue.jobsQueued }}</td>
-                <td>{{ queue.jobsDelayed }}</td>
-                <td>{{ queue.jobsProcessed }}</td>
-                <td>{{ queue.jobsCancelled }}</td>
-                <td>{{ queue.jobsFailed }}</td>
-                <td>{{ queue.jobsTotal }}</td>
+                <td class="numeric">{{ queue.jobsQueued }}</td>
+                <td class="numeric">{{ queue.jobsDelayed }}</td>
+                <td class="numeric">{{ queue.jobsProcessed }}</td>
+                <td class="numeric">{{ queue.jobsCancelled }}</td>
+                <td class="numeric">{{ queue.jobsFailed }}</td>
+                <td class="numeric">{{ queue.jobsTotal }}</td>
             </tr>
             {% else %}
             <tr>
-                <td colspan="10">No queues found.</td>
+                <td colspan="7">No queues found.</td>
             </tr>
             {% endfor %}
         </table>

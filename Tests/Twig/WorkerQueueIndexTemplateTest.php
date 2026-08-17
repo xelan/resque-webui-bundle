@@ -97,7 +97,7 @@ class WorkerQueueIndexTemplateTest extends ListTemplateTestCase
     {
         $output = $this->renderWorkers(new WorkerCriteria(), []);
 
-        $this->assertStringContainsString('<th title="Processed" style="width: 4em">', $output);
+        $this->assertStringContainsString('<th class="numeric" title="Processed" style="width: 4em">', $output);
         $this->assertStringNotContainsString('&quot;', $output);
     }
 
@@ -123,6 +123,51 @@ class WorkerQueueIndexTemplateTest extends ListTemplateTestCase
 
         $this->assertStringContainsString('emails', $output);
         $this->assertStringContainsString('15', $output, 'the total is not rendered');
+    }
+
+    /**
+     * Numbers are read by comparing them down the column, which only works
+     * when their digits line up.
+     */
+    public function testTheNumbersOfTheWorkerListAreAlignedToTheRight()
+    {
+        $output = $this->renderWorkers(new WorkerCriteria(), [$this->createWorker('host:1:default')]);
+
+        foreach (['P', 'C', 'F', 'Interval', 'Timeout', 'Memory \(limit\)'] as $label) {
+            $this->assertRegExp(
+                '#<th class="numeric"[^>]*>\s*<a href="[^"]+">\s*' . $label . '#',
+                $output,
+                $label . ' is not aligned to the right'
+            );
+        }
+
+        $this->assertSame(6, substr_count($output, '<td class="numeric">'));
+    }
+
+    public function testTheNumbersOfTheQueueListAreAlignedToTheRight()
+    {
+        $output = $this->renderQueues(new QueueCriteria(), [new Queue('emails', 1, 2, 3, 4, 5)]);
+
+        foreach (['Queued', 'Delayed', 'Processed', 'Cancelled', 'Failed', 'Total'] as $label) {
+            $this->assertRegExp(
+                '#<th class="numeric"[^>]*>\s*<a href="[^"]+">\s*' . $label . '#',
+                $output,
+                $label . ' is not aligned to the right'
+            );
+        }
+
+        $this->assertSame(6, substr_count($output, '<td class="numeric">'));
+    }
+
+    /**
+     * The name of a queue is not a number and stays where the eye looks for it.
+     */
+    public function testTheQueueNameIsNotAlignedToTheRight()
+    {
+        $output = $this->renderQueues(new QueueCriteria(), [new Queue('emails', 1, 2, 3, 4, 5)]);
+
+        $this->assertRegExp('#<th>\s*<a href="[^"]+">\s*Name#', $output);
+        $this->assertStringContainsString('<td>emails</td>', $output);
     }
 
     private function renderWorkers(WorkerCriteria $criteria, array $workers)

@@ -17,12 +17,12 @@
                 {{ helper.sortableHeader('Status', 'status', criteria, 'andaris_resque_web_ui_workers') }}
                 {{ helper.sortableHeader('Running for', 'started', criteria, 'andaris_resque_web_ui_workers') }}
                 {{ helper.sortableHeader('Running job', 'job', criteria, 'andaris_resque_web_ui_workers') }}
-                {{ helper.sortableHeader('P', 'processed', criteria, 'andaris_resque_web_ui_workers', {}, 'title="Processed" style="width: 4em"') }}
-                {{ helper.sortableHeader('C', 'cancelled', criteria, 'andaris_resque_web_ui_workers', {}, 'title="Cancelled" style="width: 4em"') }}
-                {{ helper.sortableHeader('F', 'failed', criteria, 'andaris_resque_web_ui_workers', {}, 'title="Failed" style="width: 4em"') }}
-                {{ helper.sortableHeader('Interval', 'interval', criteria, 'andaris_resque_web_ui_workers') }}
-                {{ helper.sortableHeader('Timeout', 'timeout', criteria, 'andaris_resque_web_ui_workers') }}
-                {{ helper.sortableHeader('Memory (limit)', 'memory', criteria, 'andaris_resque_web_ui_workers') }}
+                {{ helper.sortableHeader('P', 'processed', criteria, 'andaris_resque_web_ui_workers', {}, 'class="numeric" title="Processed" style="width: 4em"') }}
+                {{ helper.sortableHeader('C', 'cancelled', criteria, 'andaris_resque_web_ui_workers', {}, 'class="numeric" title="Cancelled" style="width: 4em"') }}
+                {{ helper.sortableHeader('F', 'failed', criteria, 'andaris_resque_web_ui_workers', {}, 'class="numeric" title="Failed" style="width: 4em"') }}
+                {{ helper.sortableHeader('Interval', 'interval', criteria, 'andaris_resque_web_ui_workers', {}, 'class="numeric"') }}
+                {{ helper.sortableHeader('Timeout', 'timeout', criteria, 'andaris_resque_web_ui_workers', {}, 'class="numeric"') }}
+                {{ helper.sortableHeader('Memory (limit)', 'memory', criteria, 'andaris_resque_web_ui_workers', {}, 'class="numeric"') }}
             </tr>
             {% for worker in workers %}
             <tr>
@@ -38,12 +38,12 @@
                     <td>-</td>
                 {% endif %}
 
-                <td>{{ worker.jobsProcessed }}</td>
-                <td>{{ worker.jobsCancelled }}</td>
-                <td>{{ worker.jobsFailed }}</td>
-                <td>{{ worker.interval }}</td>
-                <td>{{ worker.timeout }}</td>
-                <td>{{ worker.memory | formatBytes }} ({{ worker.memoryLimit }} MB)</td>
+                <td class="numeric">{{ worker.jobsProcessed }}</td>
+                <td class="numeric">{{ worker.jobsCancelled }}</td>
+                <td class="numeric">{{ worker.jobsFailed }}</td>
+                <td class="numeric">{{ worker.interval }}</td>
+                <td class="numeric">{{ worker.timeout }}</td>
+                <td class="numeric">{{ worker.memory | formatBytes }} ({{ worker.memoryLimit }} MB)</td>
             </tr>
             {% else %}
             <tr>
