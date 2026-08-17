@@ -21,7 +21,8 @@ use Symfony\Component\HttpFoundation\Request;
  * Subclasses describe their list through the FIELDS, NUMERIC_FIELDS,
  * IDENTITY_GETTER, DEFAULT_FIELD and DEFAULT_DIRECTION constants. Those cannot
  * be declared abstract on the PHP versions in use, so a subclass leaving one
- * out is only found once it is asked to sort.
+ * out is only found once it is asked to sort. INVERTED_FIELDS is the exception:
+ * it names what few fields run the other way round and defaults to none.
  *
  * @internal the lists of the bundle are rendered through this; it is not an
  *           extension point and may change without notice
@@ -30,6 +31,14 @@ abstract class SortCriteria
 {
     const DIRECTION_ASCENDING = 'asc';
     const DIRECTION_DESCENDING = 'desc';
+
+    /**
+     * The fields whose stored value runs opposite to what the column shows,
+     * such as a start time behind a duration: the older the timestamp, the
+     * longer the entry has been running. Sorting one of these orders by what
+     * is on screen rather than by what is behind it.
+     */
+    const INVERTED_FIELDS = [];
 
     /**
      * @var string
@@ -126,6 +135,17 @@ abstract class SortCriteria
     }
 
     /**
+     * Returns whether the values of the field run opposite to the column they
+     * are shown in.
+     *
+     * @return bool
+     */
+    public function isInvertedField()
+    {
+        return in_array($this->field, static::INVERTED_FIELDS, true);
+    }
+
+    /**
      * Returns whether the list is currently ordered by a field.
      *
      * @param string $field
@@ -159,7 +179,9 @@ abstract class SortCriteria
      *
      * Entries without a value for that field are always put last, no matter
      * which direction is asked for; an entry that never reached that stage is
-     * of no interest at the top of the list. Entries that compare equal are
+     * of no interest at the top of the list. An inverted field is compared the
+     * other way round, so that the order follows the column rather than the
+     * value behind it. Entries that compare equal are
      * ordered by what identifies them, so that the result does not depend on
      * the sort implementation of the PHP version in use.
      *
@@ -172,9 +194,10 @@ abstract class SortCriteria
         $getter = $this->getFieldGetter();
         $identity = static::IDENTITY_GETTER;
         $numeric = $this->isNumericField();
+        $inverted = $this->isInvertedField();
         $descending = $this->isDescending();
 
-        usort($entries, function ($left, $right) use ($getter, $identity, $numeric, $descending) {
+        usort($entries, function ($left, $right) use ($getter, $identity, $numeric, $inverted, $descending) {
             $leftValue = $left->{$getter}();
             $rightValue = $right->{$getter}();
 
@@ -192,6 +215,12 @@ abstract class SortCriteria
             $result = $numeric
                 ? ((int) $leftValue <=> (int) $rightValue)
                 : strcmp((string) $leftValue, (string) $rightValue);
+
+            // the column shows the opposite of what is compared here, so the
+            // outcome is turned around before the direction is applied to it
+            if ($inverted) {
+                $result = -$result;
+            }
 
             if ($result === 0) {
                 return strcmp((string) $left->{$identity}(), (string) $right->{$identity}());

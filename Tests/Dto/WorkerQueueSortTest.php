@@ -12,6 +12,7 @@ use PHPUnit\Framework\TestCase;
 
 use Andaris\ResqueWebUiBundle\Adapter\QueueAdapter;
 use Andaris\ResqueWebUiBundle\Adapter\WorkerAdapter;
+use Andaris\ResqueWebUiBundle\Dto\JobCriteria;
 use Andaris\ResqueWebUiBundle\Dto\QueueCriteria;
 use Andaris\ResqueWebUiBundle\Dto\QueueFactory;
 use Andaris\ResqueWebUiBundle\Dto\WorkerCriteria;
@@ -97,6 +98,67 @@ class WorkerQueueSortTest extends TestCase
             'ascending' => ['asc'],
             'descending' => ['desc'],
         ];
+    }
+
+    /**
+     * The column shows how long a worker has been running, so the shortest one
+     * belongs at the top of an ascending list even though it carries the
+     * highest start time.
+     */
+    public function testTheShortestRunningWorkerIsFirstWhenSortedAscending()
+    {
+        $factory = $this->createWorkerFactory(['old', 'young', 'middle'], [
+            'old' => ['started' => 1500000000],
+            'young' => ['started' => 1500000200],
+            'middle' => ['started' => 1500000100],
+        ]);
+
+        $workers = $factory->createAll(new WorkerCriteria('started', 'asc'));
+
+        $this->assertSame(['young', 'middle', 'old'], $this->idsOf($workers));
+    }
+
+    public function testTheLongestRunningWorkerIsFirstWhenSortedDescending()
+    {
+        $factory = $this->createWorkerFactory(['old', 'young', 'middle'], [
+            'old' => ['started' => 1500000000],
+            'young' => ['started' => 1500000200],
+            'middle' => ['started' => 1500000100],
+        ]);
+
+        $workers = $factory->createAll(new WorkerCriteria('started', 'desc'));
+
+        $this->assertSame(['old', 'middle', 'young'], $this->idsOf($workers));
+    }
+
+    /**
+     * Turning the comparison around must not lift the workers without a start
+     * time off the bottom of the list.
+     *
+     * @dataProvider directionProvider
+     */
+    public function testWorkersWithoutAStartTimeAreAlwaysLast($direction)
+    {
+        $factory = $this->createWorkerFactory(['unknown', 'known'], [
+            'unknown' => ['started' => ''],
+            'known' => ['started' => 1500000000],
+        ]);
+
+        $workers = $factory->createAll(new WorkerCriteria('started', $direction));
+
+        $this->assertSame('unknown', end($workers)->getId());
+    }
+
+    /**
+     * Only the duration behind the worker list runs the other way round; the
+     * job list shows its timestamps as they are.
+     */
+    public function testTheStartTimeIsTheOnlyValueRunningOppositeToItsColumn()
+    {
+        $this->assertTrue((new WorkerCriteria('started'))->isInvertedField());
+        $this->assertFalse((new WorkerCriteria('memory'))->isInvertedField());
+        $this->assertFalse((new JobCriteria('started'))->isInvertedField());
+        $this->assertFalse((new QueueCriteria('name'))->isInvertedField());
     }
 
     public function testTheQueuesAreOrderedByTheirNameByDefault()
