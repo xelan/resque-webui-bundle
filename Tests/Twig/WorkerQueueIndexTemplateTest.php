@@ -179,6 +179,32 @@ class WorkerQueueIndexTemplateTest extends ListTemplateTestCase
         $this->assertStringContainsString('<span class="text-danger">30.00 %</span>', $output);
     }
 
+    /**
+     * The share is rounded on its way onto the screen, and a rate just short
+     * of a threshold rounds up to it. The colour ranks what is shown, or a
+     * queue reading exactly 1.00 % would sit there in the green of a rate
+     * below one percent.
+     *
+     * @dataProvider roundedRateProvider
+     */
+    public function testARateThatRoundsUpToAThresholdIsColouredByWhatIsShown($processed, $failed, $expected)
+    {
+        $output = $this->renderQueues(new QueueCriteria(), [new Queue('emails', 0, 0, $processed, 0, $failed)]);
+
+        $this->assertStringContainsString($expected, $output);
+    }
+
+    public function roundedRateProvider()
+    {
+        return [
+            // 0.9999 %, which is shown as 1.00 % and has reached the first threshold
+            'just short of one percent' => [990001, 9999, '<span class="text-warning">1.00 %</span>'],
+            // 9.999 %, which is shown as 10.00 % and has reached the second one
+            'just short of ten percent' => [90001, 9999, '<span class="text-danger">10.00 %</span>'],
+            'clearly below one percent' => [99600, 400, '<span class="text-success">0.40 %</span>'],
+        ];
+    }
+
     public function testAQueueWithoutAnyJobsShowsNoFailureRate()
     {
         $output = $this->renderQueues(new QueueCriteria(), [new Queue('untouched', 0, 0, 0, 0, 0)]);
